@@ -15,6 +15,7 @@ import importlib.resources as resources
 from unittest import mock
 
 from evidence_loop.cli import main
+from scripts import verify_release
 from scripts.validate_public_release import scan
 from scripts.artifact_manifest import verify_digest_manifest, write_digest_manifest
 from scripts.artifact_smoke import check_sdist_readme_links, preflight
@@ -39,7 +40,11 @@ version = "9.9.9"
         with tempfile.TemporaryDirectory() as release_temp:
             release_root = Path(release_temp)
             (release_root / "pyproject.toml").write_text(decoy, encoding="utf-8")
-            self.assertEqual(expected_tag(release_root), "v9.9.9")
+            if verify_release.tomllib is None:
+                with self.assertRaisesRegex(RuntimeError, "multiline"):
+                    expected_tag(release_root)
+            else:
+                self.assertEqual(expected_tag(release_root), "v9.9.9")
         with self.assertRaisesRegex(RuntimeError, "multiline"):
             _fallback_project_version(decoy)
         with self.assertRaisesRegex(RuntimeError, "multiline"):
