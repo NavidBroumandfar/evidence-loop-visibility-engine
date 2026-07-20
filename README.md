@@ -1,4 +1,5 @@
-![CI](https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/evidence-loop-visibility-engine.svg)](https://pypi.org/project/evidence-loop-visibility-engine/)
 
 # Evidence Loop Visibility Engine
 
@@ -6,6 +7,8 @@
 
 A deterministic, offline reference implementation for turning bounded
 visibility evidence into one reviewable proposal per site.
+
+[Install the latest release from PyPI](https://pypi.org/project/evidence-loop-visibility-engine/)
 
 ![A measured evidence loop moving through Observe, Choose, Propose, a visible verification gate, Record, and three honest terminal states](docs/assets/evidence-loop-system.svg)
 
@@ -49,7 +52,20 @@ operated systems.
 Python 3.10+ is required. Runtime dependencies are the Python standard
 library only.
 
+### Install from PyPI
+
 ```console
+python3 -m venv .venv
+.venv/bin/python -m pip install evidence-loop-visibility-engine
+.venv/bin/evidence-loop demo --output work/demo
+.venv/bin/evidence-loop benchmark
+```
+
+### Develop from source
+
+```console
+git clone https://github.com/NavidBroumandfar/evidence-loop-visibility-engine.git
+cd evidence-loop-visibility-engine
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
 .venv/bin/evidence-loop validate --input examples/normal.json
