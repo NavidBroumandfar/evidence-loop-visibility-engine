@@ -155,6 +155,7 @@ Fixtures are synthetic and use reserved example domains.
 - [Security model](docs/security.md)
 - [Public claims](docs/public-claims.md)
 - [Quickstart](docs/quickstart.md)
+- [Release contract](docs/releasing.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 
 Run `make check` for tests, compilation, and the release scanner. Artifact

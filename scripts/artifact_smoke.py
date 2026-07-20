@@ -19,6 +19,11 @@ import tempfile
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
 
+if __package__:
+    from scripts.artifact_manifest import write_digest_manifest
+else:
+    from artifact_manifest import write_digest_manifest
+
 
 MAX_SDIST_MEMBERS = 4096
 MAX_SDIST_MEMBER_BYTES = 4 * 1024 * 1024
@@ -32,7 +37,7 @@ def _run(command: list[str], *, cwd: Path | None = None, capture: bool = False) 
 
 def preflight(python: str = sys.executable) -> None:
     missing: list[str] = []
-    for module, package in (("build", "build>=1.2"), ("twine", "twine>=5.1")):
+    for module, package in (("build", "build==1.5.0"), ("twine", "twine==6.2.0")):
         result = subprocess.run([python, "-c", f"import {module}"], capture_output=True, text=True)
         if result.returncode:
             missing.append(package)
@@ -105,14 +110,23 @@ def check_sdist_readme_links(artifact: Path, destination: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="build and smoke-test wheel and source distribution")
     parser.add_argument("--root", default=str(Path(__file__).resolve().parents[1]))
+    parser.add_argument("--dist-dir", help="keep the validated artifacts in this repository-relative directory")
+    parser.add_argument("--digest-manifest", help="write SHA-256 entries for the retained artifacts")
     args = parser.parse_args(argv)
     root = Path(args.root).resolve()
     try:
         preflight(sys.executable)
         with tempfile.TemporaryDirectory(prefix="evidence-loop-artifacts-") as temp:
             temp_root = Path(temp)
-            out = temp_root / "dist"
-            out.mkdir()
+            if args.dist_dir:
+                out = (root / args.dist_dir).resolve()
+                out.relative_to(root)
+                if out.exists() and any(out.iterdir()):
+                    raise RuntimeError("artifact output directory must be empty")
+                out.mkdir(parents=True, exist_ok=True)
+            else:
+                out = temp_root / "dist"
+                out.mkdir()
             # One build invocation creates both artifacts from a temporary cwd.
             _run([sys.executable, "-m", "build", "--wheel", "--sdist", "--outdir", str(out), str(root)], cwd=temp_root)
             artifacts = sorted(out.glob("*.whl")) + sorted(out.glob("*.tar.gz"))
@@ -138,6 +152,12 @@ def main(argv: list[str] | None = None) -> int:
                 summary = json.loads(result.stdout)
                 if summary.get("suite") != "deterministic-public-conformance-v1" or summary.get("passed") != summary.get("total"):
                     raise RuntimeError(f"artifact benchmark failed for {kind}")
+            if args.digest_manifest:
+                if not args.dist_dir:
+                    raise RuntimeError("digest manifest requires --dist-dir")
+                manifest = (root / args.digest_manifest).resolve()
+                manifest.relative_to(root)
+                write_digest_manifest(out, manifest, out.parent)
     except RuntimeError as exc:
         print(f"artifact-smoke blocked: {exc}", file=sys.stderr)
         return 2

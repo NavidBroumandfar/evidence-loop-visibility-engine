@@ -16,13 +16,62 @@ from unittest import mock
 
 from evidence_loop.cli import main
 from scripts.validate_public_release import scan
+from scripts.artifact_manifest import verify_digest_manifest, write_digest_manifest
 from scripts.artifact_smoke import check_sdist_readme_links, preflight
+from scripts.verify_release import expected_tag
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class CliAndReleaseTests(unittest.TestCase):
+    def test_release_tag_and_digest_manifest(self):
+        self.assertEqual(expected_tag(ROOT), "v0.2.0")
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            dist = root / "dist"
+            dist.mkdir()
+            wheel = dist / "example.whl"
+            sdist = dist / "example.tar.gz"
+            wheel.write_bytes(b"wheel")
+            sdist.write_bytes(b"sdist")
+            manifest = root / "artifact-digests.sha256"
+            write_digest_manifest(dist, manifest, root)
+            lines = manifest.read_text(encoding="ascii").splitlines()
+            self.assertEqual(len(lines), 2)
+            self.assertEqual(
+                {line.split("  ", 1)[1] for line in lines},
+                {"dist/example.whl", "dist/example.tar.gz"},
+            )
+            verify_digest_manifest(root, manifest)
+
+            wheel.write_bytes(b"changed")
+            with self.assertRaisesRegex(RuntimeError, "digest mismatch"):
+                verify_digest_manifest(root, manifest)
+            wheel.write_bytes(b"wheel")
+
+            extra = dist / "extra.txt"
+            extra.write_text("unexpected", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "exactly one wheel"):
+                verify_digest_manifest(root, manifest)
+            extra.unlink()
+
+            sdist.unlink()
+            with self.assertRaisesRegex(RuntimeError, "exactly one wheel"):
+                verify_digest_manifest(root, manifest)
+            sdist.write_bytes(b"sdist")
+
+            sdist.unlink()
+            sdist.symlink_to(wheel)
+            with self.assertRaisesRegex(RuntimeError, "symlink"):
+                verify_digest_manifest(root, manifest)
+            sdist.unlink()
+            sdist.write_bytes(b"sdist")
+
+            manifest.write_text(f"{'0' * 64}  ../unsafe.whl\n{'1' * 64}  dist/example.tar.gz\n", encoding="ascii")
+            with self.assertRaisesRegex(RuntimeError, "unsafe entry"):
+                verify_digest_manifest(root, manifest)
+
     def test_release_version_and_svg_assets(self):
         version = "0.2.0"
         self.assertEqual(__import__("evidence_loop").__version__, version)
