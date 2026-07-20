@@ -16,6 +16,8 @@ The package has four small layers:
 The engine can only emit proposals. It has no HTTP client, browser driver,
 provider SDK, credential lookup, subprocess, or site writer. A caller that
 needs to apply a proposal must implement a separate, explicitly approved lane.
+The data contracts are the extension points; live adapters and executors do
+not become runtime plugins. See the [open-core boundary](open-core-boundary.md).
 
 ## Data flow
 

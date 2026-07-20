@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="social-title social-desc">
+  <title id="social-title">Evidence Loop Visibility Engine social card</title>
+  <desc id="social-desc">Evidence Loop Visibility Engine with the tagline Evidence before action, four visibility lenses, and a measured loop crossing a verification gate.</desc>
+
+  <rect width="1280" height="640" fill="#080B0D"/>
+  <path d="M64 74H1216M64 566H1216" stroke="#293237"/>
+  <path d="M680 104V536" stroke="#151C1F"/>
+
+  <g font-family="system-ui, sans-serif">
+    <text x="72" y="118" fill="#45CED5" font-size="12" font-weight="700" letter-spacing="2.6">PUBLIC · OFFLINE · DETERMINISTIC</text>
+    <text x="72" y="184" fill="#F3EEE3" font-size="26" font-weight="650" letter-spacing="1.6">EVIDENCE LOOP</text>
+    <text x="72" y="217" fill="#89969B" font-size="17" letter-spacing="0.5">VISIBILITY ENGINE</text>
+
+    <text x="68" y="330" fill="#F3EEE3" font-size="55" font-weight="560" letter-spacing="-1.4">Evidence before</text>
+    <text x="68" y="393" fill="#F3EEE3" font-size="55" font-weight="560" letter-spacing="-1.4">action.</text>
+
+    <text x="72" y="507" fill="#89969B" font-size="14" font-weight="600" letter-spacing="2.1">SEO · AEO · GEO · LLMO</text>
+    <text x="72" y="535" fill="#657277" font-size="12" letter-spacing="1.2">LENSES, NOT OUTCOMES</text>
+
+    <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M771 187H1091C1148 187 1178 217 1178 272V391C1178 445 1148 473 1092 473H788C733 473 708 444 708 390V271C708 216 733 187 771 187Z" stroke="#304046" stroke-width="2"/>
+      <path d="M771 187H927M980 187H1091C1148 187 1178 217 1178 272V391" stroke="#45CED5" stroke-width="3"/>
+      <path d="M1114 473H788C733 473 708 444 708 390V271" stroke="#45CED5" stroke-width="3"/>
+    </g>
+
+    <g>
+      <path d="M934 158V503M973 158V503" stroke="#EAB260" stroke-width="2"/>
+      <path d="M934 158H947M960 158H973M934 503H947M960 503H973" stroke="#EAB260" stroke-width="2"/>
+      <rect x="940" y="317" width="27" height="27" rx="3" fill="#080B0D" stroke="#EAB260" stroke-width="2" transform="rotate(45 953.5 330.5)"/>
+      <circle cx="953.5" cy="330.5" r="3" fill="#EAB260"/>
+      <text x="953" y="135" fill="#EAB260" font-size="10" font-weight="700" letter-spacing="1.8" text-anchor="middle">VERIFY</text>
+    </g>
+
+    <g fill="#11171A" stroke="#3A484D">
+      <rect x="742" y="226" width="146" height="74" rx="8"/>
+      <rect x="1017" y="226" width="128" height="74" rx="8"/>
+      <rect x="742" y="363" width="146" height="74" rx="8"/>
+      <rect x="1017" y="363" width="128" height="74" rx="8"/>
+    </g>
+
+    <g fill="#F3EEE3" font-size="17" font-weight="570">
+      <text x="762" y="270">Observe</text>
+      <text x="1037" y="270">Choose</text>
+      <text x="762" y="407">Record</text>
+      <text x="1037" y="407">Propose</text>
+    </g>
+    <g fill="#45CED5" font-size="10" font-weight="700" letter-spacing="1.5">
+      <text x="762" y="247">01</text>
+      <text x="1037" y="247">02</text>
+      <text x="1037" y="384">03</text>
+      <text x="762" y="384">05</text>
+    </g>
+
+    <path d="M708 271L698 265V277Z" fill="#45CED5"/>
+    <path d="M1178 391L1188 385V397Z" fill="#45CED5"/>
+
+    <g>
+      <circle cx="1020" cy="504" r="5" fill="#EAB260"/>
+      <circle cx="1044" cy="504" r="5" fill="#45CED5"/>
+      <circle cx="1068" cy="504" r="5" fill="#7F8C91"/>
+      <text x="1178" y="508" fill="#657277" font-size="10" font-weight="700" letter-spacing="1.3" text-anchor="end">STOP STATES</text>
+    </g>
+  </g>
+</svg>

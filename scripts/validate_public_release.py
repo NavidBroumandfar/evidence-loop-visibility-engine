@@ -15,6 +15,7 @@ import os
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 MAX_SCAN_BYTES = 2 * 1024 * 1024
@@ -30,6 +31,75 @@ LIVE_IMPORT = re.compile(r"(?m)^\s*(?:import|from)\s+(?:http\.client|urllib(?:\.
 LIVE_CALL = re.compile(r"(?:os\.system|subprocess\.|http\.client|urllib(?:\.request)?\.|socket\.|requests\.|httpx\.|aiohttp\.|playwright|selenium|boto3|paramiko)")
 UNSAFE_SCHEME = re.compile(r"(?i)(?:javascript" + ":|data" + ":|file" + ":|ftp" + ":|http" + "://)")
 GENERATED_PART = re.compile(r"(?:^|/)(?:__pycache__|\.pytest_cache|\.mypy_cache|dist|build|[^/]+\.egg-info)(?:/|$)")
+SVG_URL = re.compile(r"url\(\s*['\"]?([^)'\"\s]+)", re.I)
+SVG_NAMESPACE = "http:" + "//www.w3.org/2000/svg"
+XLINK_NAMESPACE = "http:" + "//www.w3.org/1999/xlink"
+XML_NAMESPACE = "http:" + "//www.w3.org/XML/1998/namespace"
+SVG_ACTIVE_PREAMBLE = re.compile(r"<\?\s*xml-stylesheet(?:\s|\?>)|<!\s*(?:DOCTYPE|ENTITY)\b", re.I)
+SVG_ACTIVE_ELEMENTS = {
+    "audio",
+    "discard",
+    "embed",
+    "foreignobject",
+    "handler",
+    "iframe",
+    "listener",
+    "object",
+    "script",
+    "set",
+    "video",
+}
+
+
+def _svg_findings(text: str) -> set[str]:
+    """Return structural safety findings for a public SVG document."""
+    findings: set[str] = set()
+    if SVG_ACTIVE_PREAMBLE.search(text):
+        # Do not hand a declaration with entity expansion potential to the XML
+        # parser. Stylesheet processing instructions are active content too.
+        findings.add("active-svg-content")
+        if re.search(r"<!\s*(?:DOCTYPE|ENTITY)\b", text, re.I):
+            return findings
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError:
+        findings.add("invalid-svg-xml")
+        return findings
+    if root.tag.rsplit("}", 1)[-1] != "svg":
+        findings.add("invalid-svg-root")
+        return findings
+    for element in root.iter():
+        local_tag = element.tag.rsplit("}", 1)[-1].lower()
+        if local_tag in SVG_ACTIVE_ELEMENTS or local_tag.startswith("animate"):
+            findings.add("active-svg-content")
+        for raw_name, value in element.attrib.items():
+            name = raw_name.rsplit("}", 1)[-1].lower()
+            normalized = value.strip()
+            if name.startswith("on"):
+                findings.add("active-svg-content")
+            if raw_name == f"{{{XML_NAMESPACE}}}base" and normalized and not normalized.startswith("#"):
+                findings.add("external-svg-reference")
+            if name == "href" and normalized and not normalized.startswith("#"):
+                findings.add("external-svg-reference")
+            for match in SVG_URL.finditer(normalized):
+                if not match.group(1).startswith("#"):
+                    findings.add("external-svg-reference")
+        if local_tag == "style" and element.text:
+            if "@import" in element.text.lower() or any(
+                not match.group(1).startswith("#") for match in SVG_URL.finditer(element.text)
+            ):
+                findings.add("external-svg-reference")
+    return findings
+
+
+def _has_symlink_component(root: Path, path: Path) -> bool:
+    """Check the tracked path itself and every repository-relative ancestor."""
+    current = root
+    for part in path.relative_to(root).parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
 
 
 def _tracked_files(root: Path) -> list[Path]:
@@ -60,6 +130,11 @@ def scan(root_value: str | os.PathLike[str] = ".") -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
     for path in _tracked_files(root):
         relative = path.relative_to(root).as_posix()
+        if _has_symlink_component(root, path):
+            # Never follow a release-surface link: the target may be outside
+            # the repository and its bytes must not influence the findings.
+            findings.append({"file": relative, "rule": "symlink-release-path"})
+            continue
         if GENERATED_PART.search(relative):
             findings.append({"file": relative, "rule": "generated-artifact"})
             continue
@@ -76,6 +151,11 @@ def scan(root_value: str | os.PathLike[str] = ".") -> list[dict[str, str]]:
         except UnicodeDecodeError:
             findings.append({"file": relative, "rule": "non-utf8-release-file"})
             continue
+        if path.suffix.lower() == ".svg":
+            findings.extend(
+                {"file": relative, "rule": rule}
+                for rule in sorted(_svg_findings(text))
+            )
         # A controlled fixture may contain one intentional marker on the same
         # line as a synthetic secret test. It never bypasses unrelated rules.
         controlled_fixture = relative.startswith("tests/fixtures/") and MARKER in text
@@ -93,6 +173,17 @@ def scan(root_value: str | os.PathLike[str] = ".") -> list[dict[str, str]]:
             if rule in {"live-provider-import", "live-runtime-call"} and not runtime_surface:
                 continue
             for match in pattern.finditer(text):
+                if (
+                    rule == "unsafe-link-scheme"
+                    and path.suffix.lower() == ".svg"
+                    and any(
+                        text.startswith(namespace, match.start())
+                        for namespace in (SVG_NAMESPACE, XLINK_NAMESPACE)
+                    )
+                ):
+                    # SVG 1.1 requires this identifier as its namespace. It is
+                    # not a fetched resource or an active external reference.
+                    continue
                 line_start = text.rfind("\n", 0, match.start()) + 1
                 line_end = text.find("\n", match.end())
                 line = text[line_start : line_end if line_end >= 0 else len(text)]

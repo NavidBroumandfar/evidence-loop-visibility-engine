@@ -7,9 +7,13 @@ Context for agents and maintainers; this file is not a ranking mechanism.
 - Start: [README.md](README.md) and [docs/quickstart.md](docs/quickstart.md).
 - Contract: [docs/architecture.md](docs/architecture.md),
   [docs/loop-engineering.md](docs/loop-engineering.md).
+- Open-core boundary: [docs/open-core-boundary.md](docs/open-core-boundary.md).
 - Domains: [docs/visibility-domains.md](docs/visibility-domains.md).
 - Safety and claims: [docs/security.md](docs/security.md),
   [docs/public-claims.md](docs/public-claims.md).
 - CLI: `evidence-loop validate`, `run`, `demo`, and `benchmark`.
 - Limitation: proposals never publish, mutate sites, call providers, or prove
   ranking, traffic, answer inclusion, or citation causality.
+- Disclaimer: this context file is documentation only; Google and other
+  systems do not guarantee discovery, indexing, ranking, or visibility because
+  it exists.

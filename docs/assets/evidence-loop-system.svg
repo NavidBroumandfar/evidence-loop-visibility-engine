@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="760" viewBox="0 0 1440 760" role="img" aria-labelledby="system-title system-desc">
+  <title id="system-title">Evidence Loop system</title>
+  <desc id="system-desc">A measured five-stage loop moves from Observe to Choose, Propose, a visible verification gate, and Record before ending at approval-required, clean-no-op, or blocked.</desc>
+
+  <rect width="1440" height="760" fill="#080B0D"/>
+  <path d="M72 122H1368M72 650H1368" stroke="#293237" stroke-width="1"/>
+  <path d="M96 146V626M1344 146V626" stroke="#151C1F" stroke-width="1"/>
+
+  <g font-family="system-ui, sans-serif">
+    <text x="88" y="82" fill="#F3EEE3" font-size="23" font-weight="650" letter-spacing="1.8">EVIDENCE LOOP</text>
+    <text x="1352" y="80" fill="#8C999E" font-size="12" font-weight="600" letter-spacing="2.2" text-anchor="end">PUBLIC · OFFLINE · DETERMINISTIC</text>
+
+    <text x="88" y="187" fill="#F3EEE3" font-size="45" font-weight="560" letter-spacing="-1.2">Evidence moves. Claims wait.</text>
+    <text x="90" y="222" fill="#8C999E" font-size="16" letter-spacing="0.3">One measured proposal per site, verified before it becomes a receipt.</text>
+
+    <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M124 362H1268V512H110V405" stroke="#263237" stroke-width="2"/>
+      <path d="M124 362H745" stroke="#45CED5" stroke-width="3"/>
+      <path d="M807 362H1164" stroke="#45CED5" stroke-width="3"/>
+      <path d="M1164 362H1268V512H110V405" stroke="#334247" stroke-width="2"/>
+      <path d="M110 405V362H124" stroke="#45CED5" stroke-width="3"/>
+    </g>
+
+    <g fill="#080B0D" stroke="#3A484D" stroke-width="1.5">
+      <rect x="92" y="292" width="198" height="140" rx="10"/>
+      <rect x="319" y="292" width="198" height="140" rx="10"/>
+      <rect x="546" y="292" width="198" height="140" rx="10"/>
+      <rect x="808" y="292" width="198" height="140" rx="10"/>
+      <rect x="1035" y="292" width="198" height="140" rx="10"/>
+    </g>
+
+    <g fill="#11171A">
+      <rect x="99" y="299" width="184" height="126" rx="7"/>
+      <rect x="326" y="299" width="184" height="126" rx="7"/>
+      <rect x="553" y="299" width="184" height="126" rx="7"/>
+      <rect x="815" y="299" width="184" height="126" rx="7"/>
+      <rect x="1042" y="299" width="184" height="126" rx="7"/>
+    </g>
+
+    <g fill="#45CED5" font-size="11" font-weight="700" letter-spacing="1.8">
+      <text x="116" y="326">01 / INPUT</text>
+      <text x="343" y="326">02 / POLICY</text>
+      <text x="570" y="326">03 / BOUNDARY</text>
+      <text x="832" y="326">04 / CHECK</text>
+      <text x="1059" y="326">05 / RECEIPT</text>
+    </g>
+
+    <g fill="#F3EEE3" font-size="25" font-weight="580">
+      <text x="116" y="371">Observe</text>
+      <text x="343" y="371">Choose</text>
+      <text x="570" y="371">Propose</text>
+      <text x="832" y="371">Verify</text>
+      <text x="1059" y="371">Record</text>
+    </g>
+
+    <g fill="#89969B" font-size="13.5">
+      <text x="116" y="399">timestamped evidence</text>
+      <text x="343" y="399">one eligible signal</text>
+      <text x="570" y="399">no site mutation</text>
+      <text x="832" y="399">exact lineage</text>
+      <text x="1059" y="399">atomic digest</text>
+    </g>
+
+    <g fill="#45CED5">
+      <circle cx="92" cy="362" r="5"/>
+      <circle cx="290" cy="362" r="3"/>
+      <circle cx="319" cy="362" r="5"/>
+      <circle cx="517" cy="362" r="3"/>
+      <circle cx="546" cy="362" r="5"/>
+      <circle cx="744" cy="362" r="3"/>
+      <circle cx="808" cy="362" r="5"/>
+      <circle cx="1006" cy="362" r="3"/>
+      <circle cx="1035" cy="362" r="5"/>
+      <circle cx="1233" cy="362" r="3"/>
+    </g>
+
+    <g>
+      <text x="776" y="263" fill="#EAB260" font-size="11" font-weight="700" letter-spacing="2.1" text-anchor="middle">VERIFICATION GATE</text>
+      <path d="M756 282V442M796 282V442" stroke="#EAB260" stroke-width="2"/>
+      <path d="M756 282H770M782 282H796M756 442H770M782 442H796" stroke="#EAB260" stroke-width="2"/>
+      <rect x="763" y="349" width="26" height="26" rx="3" fill="#080B0D" stroke="#EAB260" stroke-width="2" transform="rotate(45 776 362)"/>
+      <circle cx="776" cy="362" r="3" fill="#EAB260"/>
+    </g>
+
+    <g>
+      <text x="1268" y="473" fill="#8C999E" font-size="11" font-weight="700" letter-spacing="1.8" text-anchor="end">TERMINAL STATE</text>
+      <rect x="972" y="489" width="296" height="41" rx="7" fill="#15191A" stroke="#EAB260" stroke-width="1.5"/>
+      <circle cx="993" cy="510" r="5" fill="#EAB260"/>
+      <text x="1010" y="515" fill="#F3EEE3" font-size="14" font-weight="600">approval-required</text>
+      <text x="1248" y="515" fill="#EAB260" font-size="11" font-weight="700" letter-spacing="1" text-anchor="end">HUMAN</text>
+
+      <rect x="972" y="539" width="296" height="41" rx="7" fill="#11171A" stroke="#344146"/>
+      <circle cx="993" cy="560" r="5" fill="#45CED5"/>
+      <text x="1010" y="565" fill="#D7D4CB" font-size="14" font-weight="560">clean-no-op</text>
+      <text x="1248" y="565" fill="#7F8C91" font-size="11" font-weight="700" letter-spacing="1" text-anchor="end">WAIT</text>
+
+      <rect x="972" y="589" width="296" height="41" rx="7" fill="#11171A" stroke="#344146"/>
+      <circle cx="993" cy="610" r="5" fill="#7F8C91"/>
+      <text x="1010" y="615" fill="#D7D4CB" font-size="14" font-weight="560">blocked</text>
+      <text x="1248" y="615" fill="#7F8C91" font-size="11" font-weight="700" letter-spacing="1" text-anchor="end">CORRECT</text>
+    </g>
+
+    <g fill="#8C999E" font-size="12.5" letter-spacing="0.3">
+      <text x="134" y="550">Fresh evidence can start the next bounded cycle.</text>
+      <text x="134" y="578" fill="#45CED5" font-size="11" font-weight="700" letter-spacing="1.7">REPEAT ONLY WITH NEW EVIDENCE</text>
+    </g>
+
+    <path d="M110 512L99 505V519Z" fill="#45CED5"/>
+    <g stroke="#344146" stroke-width="1">
+      <path d="M192 505V519M276 505V519M360 505V519M444 505V519M528 505V519M612 505V519M696 505V519M780 505V519M864 505V519"/>
+    </g>
+  </g>
+</svg>

@@ -6,8 +6,8 @@ This project uses Loop Engineering as a bounded evidence feedback pattern:
    completeness, freshness, and uncertainty.
 2. **Choose**: require fresh, non-missing evidence and choose the lowest numeric
    priority, then the stable opportunity ID as a tie-breaker.
-3. **Act**: create exactly one proposal per site. No website or content is
-   changed.
+3. **Propose (Act)**: create exactly one proposal per site. No website or
+   content is changed.
 4. **Verify**: independently reconstruct the selected opportunity and routed
    capability; require exact evidence IDs, approval gate, `approval_required`
    as the boolean `true`, and `mutation_allowed` as the boolean `false`.

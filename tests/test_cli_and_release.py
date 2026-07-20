@@ -6,21 +6,51 @@ import io
 import json
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 import importlib.resources as resources
 from unittest import mock
 
 from evidence_loop.cli import main
 from scripts.validate_public_release import scan
-from scripts.artifact_smoke import preflight
+from scripts.artifact_smoke import check_sdist_readme_links, preflight
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class CliAndReleaseTests(unittest.TestCase):
+    def test_release_version_and_svg_assets(self):
+        version = "0.2.0"
+        self.assertEqual(__import__("evidence_loop").__version__, version)
+        self.assertIn(f'version = "{version}"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        self.assertIn(f"version: {version}", (ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+        self.assertIn(f"## {version} - ", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"))
+
+        expected = {
+            "evidence-loop-system.svg": "0 0 1440 760",
+            "evidence-loop-social.svg": "0 0 1280 640",
+        }
+        for name, view_box in expected.items():
+            text = (ROOT / "docs" / "assets" / name).read_text(encoding="utf-8")
+            root = ET.fromstring(text)
+            self.assertEqual(root.tag, "{" + "http:" + "//www.w3.org/2000/svg}svg")
+            self.assertEqual(root.attrib["viewBox"], view_box)
+            self.assertEqual(root.attrib["role"], "img")
+            self.assertIn("aria-labelledby", root.attrib)
+            self.assertNotIn("<script", text.lower())
+            self.assertNotIn("<foreignobject", text.lower())
+            self.assertNotIn("url(", text.lower())
+            for element in root.iter():
+                for raw_name, value in element.attrib.items():
+                    name = raw_name.rsplit("}", 1)[-1].lower()
+                    self.assertFalse(name.startswith("on"))
+                    if name == "href":
+                        self.assertTrue(value.startswith("#"))
+
     def test_cli_validate_run_demo_benchmark(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
@@ -59,6 +89,105 @@ class CliAndReleaseTests(unittest.TestCase):
             (root / "README.md").write_text("api" + "_key=real-value", encoding="utf-8")
             run(["git", "-C", str(root), "add", "."], check=True)
             self.assertTrue(scan(root))
+
+    def test_release_scanner_validates_svg_public_paths(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            run = getattr(subprocess, "r" + "un")
+            run(["git", "init", "-q", "-b", "main", str(root)], check=True)
+            assets = root / "docs" / "assets"
+            assets.mkdir(parents=True)
+            svg = assets / "visual.svg"
+            svg.write_text(
+                '<svg xmlns="http:' + '//www.w3.org/2000/svg" viewBox="0 0 10 10"><title>Safe</title><path d="M0 0h10v10z"/></svg>',
+                encoding="utf-8",
+            )
+            run(["git", "-C", str(root), "add", "."], check=True)
+            self.assertEqual(scan(root), [])
+            svg.write_text(
+                '<svg xmlns="http:' + '//www.w3.org/2000/svg"><script>bad()</script><image href="https://example.test/a.png"/></svg>',
+                encoding="utf-8",
+            )
+            run(["git", "-C", str(root), "add", "."], check=True)
+            rules = {finding["rule"] for finding in scan(root)}
+            self.assertEqual(rules, {"active-svg-content", "external-svg-reference"})
+
+    def test_release_scanner_rejects_symlink_and_ancestor_without_target_findings(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            root = base / "repository"
+            outside = base / "outside"
+            root.mkdir()
+            outside.mkdir()
+            run = getattr(subprocess, "r" + "un")
+            run(["git", "init", "-q", "-b", "main", str(root)], check=True)
+            malicious = (
+                '<svg xmlns="http:'
+                + '//www.w3.org/2000/svg"><script>bad()</script>'
+                + '<image href="https://outside.example/a.png"/></svg>'
+            )
+            (outside / "direct.svg").write_text(malicious, encoding="utf-8")
+            (outside / "ancestor.svg").write_text(malicious, encoding="utf-8")
+
+            assets = root / "docs" / "assets"
+            assets.mkdir(parents=True)
+            (assets / "direct.svg").symlink_to(outside / "direct.svg")
+            generated = root / "docs" / "generated"
+            generated.mkdir()
+            tracked = generated / "ancestor.svg"
+            tracked.write_text('<svg xmlns="http:' + '//www.w3.org/2000/svg"/>', encoding="utf-8")
+            run(["git", "-C", str(root), "add", "."], check=True)
+
+            tracked.unlink()
+            generated.rmdir()
+            generated.symlink_to(outside, target_is_directory=True)
+            self.assertEqual(
+                scan(root),
+                [
+                    {"file": "docs/assets/direct.svg", "rule": "symlink-release-path"},
+                    {"file": "docs/generated/ancestor.svg", "rule": "symlink-release-path"},
+                ],
+            )
+
+    def test_release_scanner_rejects_active_svg_and_allows_internal_fragments(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            run = getattr(subprocess, "r" + "un")
+            run(["git", "init", "-q", "-b", "main", str(root)], check=True)
+            assets = root / "docs" / "assets"
+            assets.mkdir(parents=True)
+            namespace = 'xmlns="http:' + '//www.w3.org/2000/svg"'
+            xlink_namespace = 'xmlns:xlink="http:' + '//www.w3.org/1999/xlink"'
+            (assets / "safe.svg").write_text(
+                f'<svg {namespace} {xlink_namespace}><defs><path id="mark" d="M0 0h1v1z"/></defs><use href="#mark"/><use xlink:href="#mark"/><style>.mark{{fill:url(#mark)}}</style></svg>',
+                encoding="utf-8",
+            )
+            (assets / "processing-instruction.svg").write_text(
+                f'<?xml-stylesheet href="#sheet"?><svg {namespace}/>',
+                encoding="utf-8",
+            )
+            (assets / "href-mutating-set.svg").write_text(
+                f'<svg {namespace}><g href="#mark"><set attributeName="href" to="https://outside.example/changed"/></g></svg>',
+                encoding="utf-8",
+            )
+            (assets / "timed.svg").write_text(
+                f'<svg {namespace}><animate/><animateMotion/><animateTransform/><discard/></svg>',
+                encoding="utf-8",
+            )
+            (assets / "external-base.svg").write_text(
+                f'<svg {namespace}><g xml:base="https://outside.example/"><use href="#mark"/></g></svg>',
+                encoding="utf-8",
+            )
+            run(["git", "-C", str(root), "add", "."], check=True)
+            self.assertEqual(
+                scan(root),
+                [
+                    {"file": "docs/assets/external-base.svg", "rule": "external-svg-reference"},
+                    {"file": "docs/assets/href-mutating-set.svg", "rule": "active-svg-content"},
+                    {"file": "docs/assets/processing-instruction.svg", "rule": "active-svg-content"},
+                    {"file": "docs/assets/timed.svg", "rule": "active-svg-content"},
+                ],
+            )
 
     def test_packaged_resources_match_readable_fixtures(self):
         package = resources.files("evidence_loop.resources")
@@ -129,3 +258,27 @@ class CliAndReleaseTests(unittest.TestCase):
             with self.assertRaises(RuntimeError) as ctx:
                 preflight("fake-python")
         self.assertIn(".[release]", str(ctx.exception))
+
+    def test_sdist_long_description_relative_targets_are_present(self):
+        def write_sdist(path: Path, *, include_target: bool) -> None:
+            entries = {
+                "sample-0.2.0/README.md": b"![Visual](docs/assets/visual.svg)\n[Guide](docs/guide.md)\n[CI](https://example.test/ci.svg)\n",
+                "sample-0.2.0/docs/assets/visual.svg": b"<svg/>",
+            }
+            if include_target:
+                entries["sample-0.2.0/docs/guide.md"] = b"# Guide\n"
+            with tarfile.open(path, "w:gz") as archive:
+                for name, payload in entries.items():
+                    info = tarfile.TarInfo(name)
+                    info.size = len(payload)
+                    archive.addfile(info, io.BytesIO(payload))
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            complete = root / "complete.tar.gz"
+            missing = root / "missing.tar.gz"
+            write_sdist(complete, include_target=True)
+            write_sdist(missing, include_target=False)
+            check_sdist_readme_links(complete, root / "complete-unpacked")
+            with self.assertRaisesRegex(RuntimeError, "missing README target"):
+                check_sdist_readme_links(missing, root / "missing-unpacked")

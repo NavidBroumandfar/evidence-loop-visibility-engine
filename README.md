@@ -2,16 +2,47 @@
 
 # Evidence Loop Visibility Engine
 
-Evidence Loop Visibility Engine is a small Apache-2.0 reference implementation
-for turning bounded, timestamped visibility evidence into one reviewable
-proposal per site. It is useful to engineers, technical SEOs, editorial teams,
-and evaluators who need a reproducible offline loop—not a black-box promise.
+**Evidence before action.**
 
-It implements **Observe -> Choose -> Act (proposal only) -> Verify -> Record**.
-The terminal receipt is `approval-required`, `clean-no-op`, or `blocked`. The
-engine is synthetic/offline by default, multi-site, deterministic, and
-fail-closed. It does not edit sites, publish content, call providers, or infer
-rankings, traffic, answers, citations, or causality.
+A deterministic, offline reference implementation for turning bounded
+visibility evidence into one reviewable proposal per site.
+
+![A measured evidence loop moving through Observe, Choose, Propose, a visible verification gate, Record, and three honest terminal states](docs/assets/evidence-loop-system.svg)
+
+## The 60-second explanation
+
+The engine accepts strict, timestamped evidence packets, chooses one eligible
+opportunity per site, and produces a proposal without changing the site. It
+then verifies the proposal's lineage, routing, and approval boundary before it
+records an atomic receipt.
+
+Every run stops in an explicit state: `approval-required`, `clean-no-op`, or
+`blocked`. Selection and receipts are deterministic, so the same exact input
+bytes produce the same decision and digest. The installed runtime uses only
+the Python standard library and makes no network, browser, provider, or
+credential calls.
+
+This is a control loop for reviewable decisions—not a black-box promise of
+rankings, traffic, answer inclusion, citations, or causality.
+
+## Who it is for
+
+- Engineers building evidence-first SEO, AEO, GEO, or LLMO tooling.
+- Technical SEO and editorial teams that need a reproducible proposal trail.
+- Evaluators testing lineage, failure containment, and human approval gates.
+- Operators who want a useful offline core before connecting any live system.
+
+## Public core and private operation
+
+This repository is a complete, useful offline core. It is not an intentionally
+crippled demo, and its Apache-2.0 implementation has no artificial lock-in.
+Real adapters, calibrated evidence and history, evaluation and operator
+judgment, team workflows, and managed operation can add value around the core
+without changing what the public package honestly does.
+
+See the [open-core boundary](docs/open-core-boundary.md) for the extension
+points, clean-room rule, and the line between public behavior and separately
+operated systems.
 
 ## Quickstart
 
@@ -41,19 +72,13 @@ same gate:
 
 ## One bounded cycle
 
-```mermaid
-flowchart LR
-  O[Observe fresh evidence] --> C[Choose one eligible opportunity]
-  C --> A[Act: proposal only]
-  A --> V[Verify lineage, router, approval boundary]
-  V --> R[Record atomic receipt]
-  R --> T{approval-required / clean-no-op / blocked}
-```
+**Observe -> Choose -> Propose -> Verify -> Record**
 
 Choose is explicit: fresh, non-missing evidence is eligible; lower numeric
-priority wins, then the stable opportunity ID breaks ties. Act never mutates a
-site. Verify is a distinct fail-closed boundary before Record. See
-[LOOPS.md](LOOPS.md) and [docs/loop-engineering.md](docs/loop-engineering.md).
+priority wins, then the stable opportunity ID breaks ties. Propose is the
+runtime's Act step and never mutates a site. Verify is a distinct fail-closed
+boundary before Record. See [LOOPS.md](LOOPS.md) and
+[docs/loop-engineering.md](docs/loop-engineering.md).
 
 ## Input and output
 
@@ -125,6 +150,7 @@ Fixtures are synthetic and use reserved example domains.
 
 - [Architecture](docs/architecture.md)
 - [Loop Engineering](docs/loop-engineering.md)
+- [Open-core boundary](docs/open-core-boundary.md)
 - [Visibility domains](docs/visibility-domains.md)
 - [Security model](docs/security.md)
 - [Public claims](docs/public-claims.md)

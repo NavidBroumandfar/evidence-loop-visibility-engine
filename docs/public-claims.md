@@ -6,7 +6,9 @@ Safe claims made by this repository:
 - it preserves lineage and records an atomic, auditable proposal receipt;
 - it can stop cleanly or block without changing a site;
 - its deterministic public conformance suite reports committed-case pass rate
-  and zero external calls/cost.
+  and zero external calls/cost;
+- the public core is a complete, useful offline reference implementation with
+  data-contract extension points and no artificial feature lock.
 
 Claims this repository deliberately does not make:
 
@@ -19,3 +21,7 @@ Claims this repository deliberately does not make:
 
 SEO, AEO, GEO, and LLMO are useful lenses for bounded observation. They do not
 turn a proposal into proof of an external outcome.
+
+Separately operated adapters, evidence history, evaluation, team workflows,
+and managed operation are outside the public runtime. See the
+[open-core boundary](open-core-boundary.md).
