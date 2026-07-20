@@ -1,0 +1,2 @@
+include README.md LICENSE AGENTS.md CHANGELOG.md
+recursive-include src/evidence_loop/resources *.json

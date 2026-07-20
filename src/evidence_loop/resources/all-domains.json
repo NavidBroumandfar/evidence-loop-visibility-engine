@@ -1,0 +1,21 @@
+{
+  "schema_version": "1",
+  "run_id": "all-domains",
+  "sites": [
+    {
+      "site_id": "site-all-domains",
+      "site": "https://all-domains.example",
+      "evidence": [{"evidence_id": "all-evidence", "source_kind": "synthetic-observation", "observed_at": "2026-01-15T10:00:00Z", "completeness": "complete", "freshness": "fresh", "uncertainty": "low"}],
+      "opportunities": [
+        {"opportunity_id": "all-measurement", "domain": "measurement-integrity", "title": "Measurement", "priority": 1, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-technical", "domain": "technical-seo", "title": "Technical SEO", "priority": 2, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-intent", "domain": "search-intent-content", "title": "Search intent", "priority": 3, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-aeo", "domain": "aeo-answerability", "title": "AEO", "priority": 4, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-geo", "domain": "geo-citation-research", "title": "GEO observation", "priority": 5, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-llmo", "domain": "llmo-sampling", "title": "LLMO sample", "priority": 6, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-brand", "domain": "brand-governance", "title": "Brand review", "priority": 7, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"},
+        {"opportunity_id": "all-conversion", "domain": "marketing-conversion", "title": "Conversion hypothesis", "priority": 8, "evidence_ids": ["all-evidence"], "approval_gate": "human-review"}
+      ]
+    }
+  ]
+}

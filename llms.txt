@@ -1,0 +1,15 @@
+# Evidence Loop Visibility Engine
+
+Context for agents and maintainers; this file is not a ranking mechanism.
+
+- Purpose: deterministic, offline, multi-site evidence loop for bounded SEO,
+  AEO, GEO, and LLMO observation.
+- Start: [README.md](README.md) and [docs/quickstart.md](docs/quickstart.md).
+- Contract: [docs/architecture.md](docs/architecture.md),
+  [docs/loop-engineering.md](docs/loop-engineering.md).
+- Domains: [docs/visibility-domains.md](docs/visibility-domains.md).
+- Safety and claims: [docs/security.md](docs/security.md),
+  [docs/public-claims.md](docs/public-claims.md).
+- CLI: `evidence-loop validate`, `run`, `demo`, and `benchmark`.
+- Limitation: proposals never publish, mutate sites, call providers, or prove
+  ranking, traffic, answer inclusion, or citation causality.

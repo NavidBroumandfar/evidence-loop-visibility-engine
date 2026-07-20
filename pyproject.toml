@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evidence-loop-visibility-engine"
+version = "0.1.0"
+description = "A bounded, deterministic reference implementation for evidence-first visibility loops."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [{ name = "Navid Broumandfar" }]
+dependencies = []
+keywords = ["evidence", "seo", "aeo", "geo", "llmo", "loop-engineering", "visibility"]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+[project.optional-dependencies]
+release = ["build>=1.2", "twine>=5.1"]
+
+[project.urls]
+Homepage = "https://github.com/NavidBroumandfar/evidence-loop-visibility-engine"
+Documentation = "https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/tree/main/docs"
+Issues = "https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/issues"
+Source = "https://github.com/NavidBroumandfar/evidence-loop-visibility-engine"
+
+[project.scripts]
+evidence-loop = "evidence_loop.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+evidence_loop = ["py.typed", "resources/*.json"]

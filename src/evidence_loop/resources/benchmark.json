@@ -1,0 +1,9 @@
+{
+  "suite": "deterministic-public-conformance-v1",
+  "cases": [
+    {"input": "normal.json", "expected": {"terminal_state": "approval-required", "selected": {"site-alpha": "alpha-technical-1", "site-beta": "beta-intent-1"}}},
+    {"input": "clean-no-op.json", "expected": {"terminal_state": "clean-no-op", "selected": {"site-clean": null}}},
+    {"input": "contained-site-failure.json", "expected": {"terminal_state": "approval-required", "selected": {"site-healthy": "healthy-opportunity-1", "site-contained": null}}},
+    {"input": "all-domains.json", "expected": {"terminal_state": "approval-required", "selected": {"site-all-domains": "all-measurement"}}}
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": "1",
+  "run_id": "demo-normal",
+  "sites": [
+    {
+      "site_id": "site-alpha",
+      "site": "https://alpha.example",
+      "evidence": [
+        {
+          "evidence_id": "alpha-crawl-1",
+          "source_kind": "search-console",
+          "observed_at": "2026-01-15T10:00:00Z",
+          "completeness": "complete",
+          "freshness": "fresh",
+          "uncertainty": "low",
+          "summary": "Synthetic crawl observation"
+        }
+      ],
+      "opportunities": [
+        {
+          "opportunity_id": "alpha-technical-1",
+          "domain": "technical-seo",
+          "title": "Review indexability signals",
+          "priority": 10,
+          "evidence_ids": ["alpha-crawl-1"],
+          "approval_gate": "human-review"
+        },
+        {
+          "opportunity_id": "alpha-aeo-1",
+          "domain": "aeo-answerability",
+          "title": "Review answer structure",
+          "priority": 20,
+          "evidence_ids": ["alpha-crawl-1"],
+          "approval_gate": "human-review"
+        }
+      ]
+    },
+    {
+      "site_id": "site-beta",
+      "site": "https://beta.example",
+      "evidence": [
+        {
+          "evidence_id": "beta-intent-1",
+          "source_kind": "research-notes",
+          "observed_at": "2026-01-15T10:00:00Z",
+          "completeness": "partial",
+          "freshness": "fresh",
+          "uncertainty": "medium",
+          "summary": "Synthetic intent observation"
+        }
+      ],
+      "opportunities": [
+        {
+          "opportunity_id": "beta-intent-1",
+          "domain": "search-intent-content",
+          "title": "Clarify search intent",
+          "priority": 5,
+          "evidence_ids": ["beta-intent-1"],
+          "approval_gate": "editorial-review"
+        }
+      ]
+    }
+  ]
+}

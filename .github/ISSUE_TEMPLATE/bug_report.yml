@@ -1,0 +1,16 @@
+name: Bug report
+description: Report a reproducible issue in the public reference.
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include a minimal synthetic fixture and command; do not include secrets or private data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true

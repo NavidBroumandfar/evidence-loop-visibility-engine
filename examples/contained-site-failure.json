@@ -1,0 +1,54 @@
+{
+  "schema_version": "1",
+  "run_id": "demo-contained",
+  "sites": [
+    {
+      "site_id": "site-healthy",
+      "site": "https://healthy.example",
+      "evidence": [
+        {
+          "evidence_id": "healthy-1",
+          "source_kind": "manual-observation",
+          "observed_at": "2026-01-15T10:00:00Z",
+          "completeness": "complete",
+          "freshness": "fresh",
+          "uncertainty": "low"
+        }
+      ],
+      "opportunities": [
+        {
+          "opportunity_id": "healthy-opportunity-1",
+          "domain": "measurement-integrity",
+          "title": "Preserve measurement context",
+          "priority": 1,
+          "evidence_ids": ["healthy-1"],
+          "approval_gate": "human-review"
+        }
+      ]
+    },
+    {
+      "site_id": "site-contained",
+      "site": "https://contained.example",
+      "evidence": [
+        {
+          "evidence_id": "contained-1",
+          "source_kind": "manual-observation",
+          "observed_at": "2026-01-15T10:00:00Z",
+          "completeness": "complete",
+          "freshness": "fresh",
+          "uncertainty": "high"
+        }
+      ],
+      "opportunities": [
+        {
+          "opportunity_id": "contained-opportunity-1",
+          "domain": "future-provider-module",
+          "title": "Unsupported capability is contained",
+          "priority": 1,
+          "evidence_ids": ["contained-1"],
+          "approval_gate": "human-review"
+        }
+      ]
+    }
+  ]
+}

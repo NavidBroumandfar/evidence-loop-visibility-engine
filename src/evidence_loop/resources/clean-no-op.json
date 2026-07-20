@@ -1,0 +1,30 @@
+{
+  "schema_version": "1",
+  "run_id": "demo-clean",
+  "sites": [
+    {
+      "site_id": "site-clean",
+      "site": "https://clean.example",
+      "evidence": [
+        {
+          "evidence_id": "clean-old-1",
+          "source_kind": "analytics",
+          "observed_at": "2025-01-15T10:00:00Z",
+          "completeness": "complete",
+          "freshness": "stale",
+          "uncertainty": "low"
+        }
+      ],
+      "opportunities": [
+        {
+          "opportunity_id": "clean-opportunity-1",
+          "domain": "measurement-integrity",
+          "title": "Wait for fresh evidence",
+          "priority": 1,
+          "evidence_ids": ["clean-old-1"],
+          "approval_gate": "human-review"
+        }
+      ]
+    }
+  ]
+}

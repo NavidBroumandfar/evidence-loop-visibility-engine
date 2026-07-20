@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a bounded, evidence-preserving improvement.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and evidence
+      description: Explain the user problem and how a deterministic test could demonstrate it.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Safety and approval boundary
+      description: Describe how the proposal remains offline or gains explicit approval.
+    validations:
+      required: true
