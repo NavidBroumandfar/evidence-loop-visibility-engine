@@ -18,7 +18,7 @@ from evidence_loop.cli import main
 from scripts.validate_public_release import scan
 from scripts.artifact_manifest import verify_digest_manifest, write_digest_manifest
 from scripts.artifact_smoke import check_sdist_readme_links, preflight
-from scripts.verify_release import expected_tag
+from scripts.verify_release import _fallback_project_version, expected_tag
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +27,23 @@ ROOT = Path(__file__).resolve().parents[1]
 class CliAndReleaseTests(unittest.TestCase):
     def test_release_tag_and_digest_manifest(self):
         self.assertEqual(expected_tag(ROOT), "v0.2.0")
+        decoy = '''decoy = """
+[project]
+version = "0.2.0"
+"""
+
+[project]
+name = "example"
+version = "9.9.9"
+'''
+        with tempfile.TemporaryDirectory() as release_temp:
+            release_root = Path(release_temp)
+            (release_root / "pyproject.toml").write_text(decoy, encoding="utf-8")
+            self.assertEqual(expected_tag(release_root), "v9.9.9")
+        with self.assertRaisesRegex(RuntimeError, "multiline"):
+            _fallback_project_version(decoy)
+        with self.assertRaisesRegex(RuntimeError, "multiline"):
+            _fallback_project_version('[project]\ndescription = """version = "0.2.0"""\nversion = "9.9.9"\n')
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             dist = root / "dist"
