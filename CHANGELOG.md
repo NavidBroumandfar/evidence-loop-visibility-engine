@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 - 2026-07-22
+
+- Isolated the recursive Makefile selection test from inherited parent Make
+  variables so the protected release workflow and ordinary CI exercise the
+  same deterministic fallback behavior. Runtime behavior is unchanged.
+- Preserved `v0.3.0` as an immutable GitHub release after its PyPI workflow
+  stopped at the test gate; `v0.3.1` is the corrective package release.
+
 ## 0.3.0 - 2026-07-22
 
 - Controller-accepted local Phase 1 implementation checkpoint (2026-07-20)

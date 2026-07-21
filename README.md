@@ -7,11 +7,11 @@
 A deterministic, offline reference implementation for turning bounded
 visibility evidence into one reviewable proposal per site.
 
-Version `0.3.0` was controller-accepted
+The `0.3.x` release line was controller-accepted
 on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
 evaluation returned PASS. Immutable candidate identities are recorded outside
 the candidate tree so editing a truth document cannot invalidate a fingerprint
-embedded in that same content. The `v0.3.0` GitHub release is the publication
+embedded in that same content. The `v0.3.1` GitHub release is the package publication
 trigger; PyPI availability follows its protected Trusted Publishing workflow.
 
 ![A measured evidence loop moving through Observe, Choose, Propose, a visible verification gate, Record, and three honest terminal states](docs/assets/evidence-loop-system.svg)
