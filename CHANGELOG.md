@@ -18,8 +18,8 @@
   repository or its Action.
 - Fixed the local `make check` gate to prefer an existing `.venv` interpreter
   while retaining the system-Python fallback used by CI.
-- Added a local Phase 3 companion GitHub Action candidate. It installs the
-  immutable Action checkout without package-index access, accepts only a
+- Added a local Phase 3 companion GitHub Action candidate. It executes directly
+  from the immutable Action checkout without package installation, accepts only a
   bounded repository-relative directory of sanitized Connector Exchange
   Envelope v1 JSON files, requires an explicit UTC bound, executes one
   offline cycle, and uploads only the normalized document and core receipts.

@@ -95,8 +95,8 @@ over-cardinality envelopes, credential/private-ID shapes, invalid digest
 roles, future evidence, unsafe GitHub output metadata, and ambiguous arguments
 before approved artifact upload.
 
-The Action installs the public core from its own immutable checkout with
-package-index access disabled. Its external `setup-python` and
+The Action executes the public core directly from its own immutable checkout
+without package installation. Its external `setup-python` and
 `upload-artifact` steps are pinned to full commit SHAs. The caller retains a
 least-privilege `contents: read` permission boundary. It writes exactly
 `normalized.json`, `run.json`, and, for a non-blocked terminal state,

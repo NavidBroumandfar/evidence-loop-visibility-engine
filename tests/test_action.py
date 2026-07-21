@@ -340,6 +340,8 @@ class CompanionActionTests(unittest.TestCase):
         self.assertNotIn("secrets.", action)
         self.assertNotIn("curl ", action)
         self.assertNotIn("wget ", action)
+        self.assertNotIn("pip install", action)
+        self.assertIn("PYTHONPATH: ${{ github.action_path }}/src", action)
 
         source = (ROOT / "src" / "evidence_loop" / "action_runner.py").read_text(encoding="utf-8")
         tree = ast.parse(source)

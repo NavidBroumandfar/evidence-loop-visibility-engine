@@ -120,8 +120,8 @@ It never invokes or bundles a provider connector. The fixed artifact contains
 only `normalized.json`, `run.json`, and the non-blocked
 `last-success.json`.
 
-External Action dependencies are pinned to full commit SHAs, core installation
-disables package-index access, and the documented caller permission is
+External Action dependencies are pinned to full commit SHAs, the core executes
+directly from the immutable Action checkout without package installation, and the documented caller permission is
 `contents: read`. The release candidate has not yet completed a hosted
 GitHub Actions run. Local synthetic checks do not prove hosted execution,
 publication, provider compatibility, or a production result. See

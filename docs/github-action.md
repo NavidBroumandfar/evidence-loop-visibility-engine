@@ -5,10 +5,10 @@
 > validation made no model, evaluator, provider, credential, publication, or
 > deployment call.
 
-The root `action.yml` installs the public core from the immutable Action
-checkout without package-index access, validates sanitized Connector Exchange
+The root `action.yml` executes the public core directly from the immutable
+Action checkout without package installation, validates sanitized Connector Exchange
 Envelope v1 files, normalizes them with an explicit UTC bound, and runs the
-installed engine exactly once. It does not bundle or invoke a connector.
+engine exactly once. It does not bundle or invoke a connector.
 
 ## Inputs
 

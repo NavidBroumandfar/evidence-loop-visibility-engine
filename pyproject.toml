@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-release = ["build==1.5.0", "twine==6.2.0"]
+release = ["build==1.5.0", "setuptools==83.0.0", "twine==6.2.0"]
 
 [project.urls]
 Homepage = "https://github.com/NavidBroumandfar/evidence-loop-visibility-engine"

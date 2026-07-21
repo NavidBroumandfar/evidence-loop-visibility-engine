@@ -51,7 +51,7 @@ connector inputs. It does not enumerate environment variables or invoke a
 provider connector. Caller workflows must not pass provider credentials into
 the Action step. External `setup-python` and `upload-artifact` actions are
 pinned to full commit SHAs, shell commands consume expressions only through
-quoted environment variables, package-index access is disabled for core
-installation, and the documented job permission is `contents: read`.
+quoted environment variables, the core executes directly from the immutable
+Action checkout without package installation, and the documented job permission is `contents: read`.
 GitHub's artifact service is workflow infrastructure, not a provider request
 by the evidence-loop runtime.
