@@ -2,7 +2,7 @@ cff-version: 1.2.0
 title: "Evidence Loop Visibility Engine"
 message: "Please cite this public reference implementation when you build on its deterministic evidence-loop contract."
 type: software
-version: 0.3.0
+version: 0.3.1
 license: Apache-2.0
 repository-code: https://github.com/NavidBroumandfar/evidence-loop-visibility-engine
 authors:

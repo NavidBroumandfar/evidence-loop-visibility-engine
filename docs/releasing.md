@@ -27,7 +27,8 @@ contract below with explicit external release authority.
 - The GitHub `pypi` environment must be limited to tags matching `v*` and must
   require maintainer review before the first release is published.
 - Package versions and Git tags must match for an authorized release. Version
-  `0.2.0` is historical tag `v0.2.0`; local version `0.3.0` has no tag.
+  `0.3.0` is an immutable GitHub release whose PyPI workflow stopped at the
+  test gate; `0.3.1` is the corrective package release.
 - Published files are immutable. A failed release is repaired with a new
   version; an existing version is never overwritten.
 
