@@ -1,13 +1,13 @@
 # Architecture
 
-The `0.3.0` Phase 1 release candidate was controller-accepted
+Version `0.3.0` Phase 1 was controller-accepted
 on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
-evaluation returned PASS. It remains unreleased and unpublished; its bounded
-live connector proof is compatibility evidence, not traffic, ranking,
+evaluation returned PASS and passed the external GitHub release gates. Its
+bounded live connector proof is compatibility evidence, not traffic, ranking,
 conversion, causality, or production evidence. The Phase 3 companion Action candidate was
 added on 2026-07-21 with Codex-only deterministic validation and no model,
 provider, credential, or publication action. Hosted synthetic push and
-pull-request Action jobs passed at candidate commit `bfa544e`. The candidate
+pull-request Action jobs passed at candidate commit `bfa544e`. The release
 has six small offline layers:
 
 1. `schema.py` reads exact bytes, rejects duplicate keys and non-finite JSON,
@@ -49,7 +49,7 @@ site, so an independent site can still produce an accepted proposal.
 
 ## Local Phase 1 checkpoint — Normalization layer
 
-The controller-accepted release candidate places deterministic, offline normalization
+Version `0.3.0` places deterministic, offline normalization
 between separately distributed connector envelopes and the core input. It
 performs generic site grouping, field translation, and digest computation—not
 provider-specific adapter logic. It is not published, released, or provider

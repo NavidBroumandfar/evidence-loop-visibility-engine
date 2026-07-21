@@ -1,21 +1,20 @@
 # Roadmap
 
-Phase 1 has a controller-accepted `0.3.0` release candidate as
+Phase 1 is included in the controller-accepted `0.3.0` release,
 of 2026-07-20, after independent read-only `opencode-go/grok-4.5` (`high`)
 evaluation returned PASS. Immutable candidate identities are recorded outside
 the candidate tree so editing a truth document cannot invalidate a fingerprint
 embedded in that same content.
-It remains unreleased and unpublished, and is not provider, traffic, ranking,
-conversion, causality, or production-outcome evidence. Phase 2 has a separately
-distributed release candidate with bounded read-only live compatibility proof.
-Phase 3 has a companion Action release candidate with hosted synthetic GitHub
+and is not provider, traffic, ranking, conversion, causality, or
+production-outcome evidence. Phase 2 has a separately distributed GitHub
+release with bounded read-only live compatibility proof. Phase 3 has a
+companion Action release with hosted synthetic GitHub
 execution proof. Phase 4 and later remain planned. Status may change based on
 access, API availability, and operator feedback.
 
 ## Phase 1 — Connector contract and normalization (in the installed core)
 
-**Status:** Controller-accepted release candidate (2026-07-20) — unreleased
-and unpublished
+**Status:** Released in public core `v0.3.0` (2026-07-22)
 
 The checkpoint accepts sanitized Connector Exchange Envelope v1 files through
 the `normalize` command and produces a core-valid schema version `2` document.
@@ -28,9 +27,9 @@ separate public opportunity input is present.
 
 The checkpoint remains deterministic, offline, standard-library-only, and
 generic: it has no HTTP, credentials, SDKs, subprocesses, provider logic, or
-site writes. Connectors remain separate and opt-in. This implementation is a
-controller-accepted release candidate, not a released capability or
-provider, live, or production evidence.
+site writes. Connectors remain separate and opt-in. Release does not turn
+compatibility evidence into provider, traffic, ranking, conversion, causality,
+or production-outcome evidence.
 
 See [docs/connector-contract.md](docs/connector-contract.md).
 
@@ -57,8 +56,8 @@ Repository: [evidence-loop-vercel-web-analytics-connector](https://github.com/Na
 
 ## Phase 3 — Companion GitHub Action
 
-**Status:** Codex-validated release candidate with hosted synthetic GitHub
-execution proof (2026-07-22) — unreleased and unpublished. At the owner's
+**Status:** Released in public core `v0.3.0` with hosted synthetic GitHub
+execution proof (2026-07-22). At the owner's
 direction this phase used deterministic Codex checks only and made no
 OpenCode, model, evaluator, provider, or live-data call.
 

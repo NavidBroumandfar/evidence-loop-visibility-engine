@@ -2,14 +2,12 @@
 
 Releases are maintainer operations. Contributors do not need PyPI credentials.
 
-The `0.3.0` Phase 1 release candidate was controller-accepted
+Version `0.3.0` Phase 1 was controller-accepted
 on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
-evaluation returned PASS. It remains unreleased and unpublished; its bounded
-live connector proof is compatibility evidence, not traffic, ranking,
-conversion, causality, or production evidence. This satisfies the implementation
-review/acceptance checkpoint only. Do not create `v0.3.0`, a GitHub release,
-or a package publication without the remaining release gates and explicit
-external release authority. The existing `0.2.0` history remains unchanged.
+evaluation returned PASS and passed the external GitHub release gates. Its
+bounded live connector proof is compatibility evidence, not traffic, ranking,
+conversion, causality, or production evidence. Future releases must repeat the
+contract below with explicit external release authority.
 
 ## Contract
 

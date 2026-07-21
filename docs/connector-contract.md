@@ -1,16 +1,15 @@
 # Connector contract
 
 This document describes the clean-room boundary between the Evidence Loop
-core release candidate and separately distributed provider connectors.
+public core and separately distributed provider connectors.
 
-> **Status: controller-accepted `0.3.0` Phase 1 release candidate
+> **Status: released in controller-accepted `0.3.0` Phase 1
 > (2026-07-20).** Independent read-only
-> `opencode-go/grok-4.5` (`high`) evaluation returned PASS. The candidate
-> remains unreleased and unpublished. Its bounded live connector proof is
+> `opencode-go/grok-4.5` (`high`) evaluation returned PASS. Its bounded live connector proof is
 > compatibility evidence, not traffic, ranking, conversion, causality, or
 > production evidence.
 
-## Local checkpoint core input schemas (0.3.0, unreleased)
+## Core input schemas (0.3.0)
 
 The local `evidence-loop` checkpoint accepts strict public schema versions `1`
 and `2`:
@@ -63,7 +62,7 @@ unvalidated schema-version-1 input.
 
 ## Connector Exchange Envelope v1
 
-The local checkpoint validates this envelope and deterministically translates
+The public core validates this envelope and deterministically translates
 it into schema version `2`. Separately distributed connectors remain
 responsible for producing sanitized files; no connector is bundled or invoked.
 
@@ -113,7 +112,7 @@ Validation rules:
 - Schema version `1` and all committed or CI fixtures
   retain reserved example domains (`example.com`, `*.example`, `*.test`,
   `*.invalid`).
-- The local unreleased Phase 1 checkpoint's schema version `2` may accept real
+- Phase 1 schema version `2` may accept real
   public HTTPS origins for local runtime inputs. Committed fixtures and CI
   continue to use reserved example domains.
 
@@ -125,9 +124,9 @@ nonsecret tuple (`source`, `provider`, `scope_ref`, `site_id`, `site_url`,
 same tuple appears more than once, reject the set whether payloads match or
 conflict.
 
-## Local normalization boundary (Phase 1 checkpoint)
+## Normalization boundary (Phase 1)
 
-The local unreleased Phase 1 checkpoint normalizer sits between the connector
+The Phase 1 normalizer sits between the connector
 envelope and the core input. It performs deterministic, offline, generic
 normalization—not provider-specific adapter logic. It does the following:
 
@@ -188,10 +187,9 @@ normalization—not provider-specific adapter logic. It does the following:
    core, using the versioned schema that supports the translated uncertainty
    values.
 
-The normalization layer is controller-accepted release-candidate core logic,
-not part of separately distributed connector tooling. It remains unreleased
-and unpublished; acceptance does not grant provider,
-live, production, publication, or release authority. The core normalizer
+The normalization layer is controller-accepted public core logic, not part of
+separately distributed connector tooling. Release does not grant provider,
+live, production, or site-mutation authority. The core normalizer
 receives only a sanitized, credential-free envelope and makes no network,
 provider, subprocess, or credential calls.
 
@@ -231,10 +229,9 @@ provider, subprocess, or credential calls.
 
 ## Versioning
 
-This contract is at version `1` in the local checkpoint. Breaking changes to
+This contract is at version `1` in public core `0.3.0`. Breaking changes to
 envelope semantics or security invariants increment the major version.
-Additive, backward-compatible fields increment the minor version. Its local
-implementation does not constitute a published contract release.
+Additive, backward-compatible fields increment the minor version.
 
 ## Testing
 
@@ -248,7 +245,7 @@ version require the public core to be installed. These tests remain offline
 and use only synthetic data. Live provider access is never part of connector
 CI.
 
-The local checkpoint includes round-trip tests: sanitized envelope →
+The public core includes round-trip tests: sanitized envelope →
 normalization produces core-valid document → core `validate_document()`
 passes. They remain offline and do not establish provider compatibility.
 

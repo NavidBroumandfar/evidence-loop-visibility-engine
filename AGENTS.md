@@ -31,14 +31,14 @@ fail-closed for Python 3.10+.
 - `scripts/validate_public_release.py`: defense-in-depth release heuristic.
 - `docs/public-claims.md`: approved claim boundary.
 - `docs/connector-contract.md`: versioned clean-room connector envelope
-  semantics and security invariants. The `0.3.0` release candidate was
+  semantics and security invariants. Version `0.3.0` was
   controller-accepted on 2026-07-20 after independent read-only
-  `opencode-go/grok-4.5` (`high`) evaluation returned PASS. It remains
-  unreleased and unpublished until the external release gates pass.
+  `opencode-go/grok-4.5` (`high`) evaluation returned PASS and passed the
+  external GitHub release gates.
   Connectors remain separately distributed.
-- `ROADMAP.md`: status truth for the controller-accepted Phase 1 release
-  candidate, separately distributed Phase 2 connector release, and Phase 3
-  companion Action candidate. The connector has a bounded live compatibility
+- `ROADMAP.md`: status truth for the controller-accepted Phase 1 release,
+  separately distributed Phase 2 connector release, and Phase 3 companion
+  Action release. The connector has a bounded live compatibility
   proof; the Action has hosted synthetic GitHub execution proof. Update
   only when phase status materially changes.
 
