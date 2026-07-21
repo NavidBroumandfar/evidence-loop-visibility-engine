@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.2 - 2026-07-22
+
+- Made the recursive Makefile-selection assertion semantic instead of
+  position-dependent and cleared inherited `MAKELEVEL`, covering the exact
+  nested GNU Make environment used by the protected release job. Runtime
+  behavior is unchanged.
+- Preserved `v0.3.1` after its PyPI workflow stopped at the same test gate;
+  `v0.3.2` is the corrective package release.
+
 ## 0.3.1 - 2026-07-22
 
 - Isolated the recursive Makefile selection test from inherited parent Make

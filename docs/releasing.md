@@ -28,7 +28,8 @@ contract below with explicit external release authority.
   require maintainer review before the first release is published.
 - Package versions and Git tags must match for an authorized release. Version
   `0.3.0` is an immutable GitHub release whose PyPI workflow stopped at the
-  test gate; `0.3.1` is the corrective package release.
+  test gate; `0.3.1` is also GitHub-only after a nested GNU Make presentation
+  mismatch; `0.3.2` is the corrective package release.
 - Published files are immutable. A failed release is repaired with a new
   version; an existing version is never overwritten.
 
