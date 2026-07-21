@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "source": "synthetic-connector",
+  "provider": "synthetic-provider",
+  "scope_ref": "public-alpha",
+  "site_id": "site-alpha",
+  "site_url": "https://alpha.example",
+  "observation_window": {
+    "start": "2026-07-17T00:00:00Z",
+    "end": "2026-07-18T09:00:00Z"
+  },
+  "collected_at": "2026-07-18T09:00:00Z",
+  "grain": "page-level",
+  "completeness": "partial",
+  "freshness": "stale",
+  "uncertainty": "medium",
+  "measures": {
+    "observations": {
+      "value": 7.5,
+      "unit": "count"
+    }
+  },
+  "lineage": [
+    {
+      "stage": "provider-response",
+      "reference": "provider_response_sha256",
+      "method": "sha256"
+    }
+  ],
+  "provider_response_sha256": "f82927c46aa2a5854e12e728def6152787b963a47811a55c0c5ca24ba555a5f4"
+}

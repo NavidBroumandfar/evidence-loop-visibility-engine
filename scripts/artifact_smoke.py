@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -128,7 +129,20 @@ def main(argv: list[str] | None = None) -> int:
                 out = temp_root / "dist"
                 out.mkdir()
             # One build invocation creates both artifacts from a temporary cwd.
-            _run([sys.executable, "-m", "build", "--wheel", "--sdist", "--outdir", str(out), str(root)], cwd=temp_root)
+            _run(
+                [
+                    sys.executable,
+                    "-m",
+                    "build",
+                    "--no-isolation",
+                    "--wheel",
+                    "--sdist",
+                    "--outdir",
+                    str(out),
+                    str(root),
+                ],
+                cwd=temp_root,
+            )
             artifacts = sorted(out.glob("*.whl")) + sorted(out.glob("*.tar.gz"))
             if len(artifacts) != 2:
                 raise RuntimeError("artifact-smoke expected exactly one wheel and one source distribution")
@@ -136,19 +150,94 @@ def main(argv: list[str] | None = None) -> int:
             check_sdist_readme_links(sdist, temp_root / "unpacked-sdist")
             _run([sys.executable, "-m", "twine", "check", *(str(path) for path in artifacts)], cwd=temp_root)
             input_file = root / "examples" / "normal.json"
+            connector_inputs = [
+                root / "examples" / "connector-envelope.json",
+                root / "examples" / "connector-envelope-second.json",
+            ]
             for artifact in artifacts:
                 kind = "wheel" if artifact.suffix == ".whl" else "sdist"
-                env = temp_root / f"venv-{kind}"
-                _run([sys.executable, "-m", "venv", str(env)], cwd=temp_root)
-                vpy = env / "bin" / "python"
-                install_command = [str(vpy), "-m", "pip", "install", "--no-deps", str(artifact)]
-                if kind == "wheel":
-                    install_command.insert(4, "--no-index")
-                _run(install_command, cwd=temp_root)
-                _run([str(vpy), "-m", "evidence_loop", "validate", "--input", str(input_file)], cwd=temp_root)
-                _run([str(vpy), "-m", "evidence_loop", "run", "--input", str(input_file), "--output", str(temp_root / f"run-{kind}")], cwd=temp_root)
-                _run([str(vpy), "-m", "evidence_loop", "demo", "--output", str(temp_root / f"demo-{kind}")], cwd=temp_root)
-                result = _run([str(vpy), "-m", "evidence_loop", "benchmark"], cwd=temp_root, capture=True)
+                target = temp_root / f"target-{kind}"
+                install_env = os.environ.copy()
+                install_env["PIP_NO_INDEX"] = "1"
+                install_env["PIP_DISABLE_PIP_VERSION_CHECK"] = "1"
+                install_env["PIP_NO_CACHE_DIR"] = "1"
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "install",
+                        "--target",
+                        str(target),
+                        "--no-index",
+                        "--no-deps",
+                        "--no-build-isolation",
+                        str(artifact),
+                    ],
+                    cwd=temp_root,
+                    env=install_env,
+                    check=True,
+                    text=True,
+                )
+                runtime_env = os.environ.copy()
+                runtime_env["PYTHONPATH"] = str(target)
+
+                def run_installed(command: list[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
+                    return subprocess.run(
+                        [sys.executable, *command],
+                        cwd=temp_root,
+                        env=runtime_env,
+                        check=True,
+                        text=True,
+                        capture_output=capture,
+                    )
+
+                run_installed(
+                    [
+                        "-c",
+                        "from pathlib import Path; import evidence_loop; "
+                        f"assert Path(evidence_loop.__file__).resolve().is_relative_to(Path({str(target)!r}).resolve())",
+                    ]
+                )
+                run_installed(["-m", "evidence_loop", "validate", "--input", str(input_file)])
+                run_installed(["-m", "evidence_loop", "run", "--input", str(input_file), "--output", str(temp_root / f"run-{kind}")])
+                normalized_output = temp_root / f"normalized-{kind}"
+                normalize_command = ["-m", "evidence_loop", "normalize"]
+                for connector_input in connector_inputs:
+                    normalize_command.extend(["--input", str(connector_input)])
+                normalize_command.extend(["--output", str(normalized_output), "--as-of", "2026-12-31T00:00:00Z"])
+                run_installed(normalize_command)
+                run_installed(["-m", "evidence_loop", "run", "--input", str(normalized_output / "normalized.json"), "--output", str(temp_root / f"normalized-run-{kind}")])
+                action_workspace = temp_root / f"action-workspace-{kind}"
+                action_inputs = action_workspace / "envelopes"
+                action_inputs.mkdir(parents=True)
+                for index, connector_input in enumerate(connector_inputs, start=1):
+                    shutil.copyfile(connector_input, action_inputs / f"input-{index}.json")
+                action_result = run_installed(
+                    [
+                        "-m",
+                        "evidence_loop.action_runner",
+                        "--workspace",
+                        str(action_workspace),
+                        "--envelope-directory",
+                        "envelopes",
+                        "--as-of",
+                        "2026-12-31T00:00:00Z",
+                        "--output-directory",
+                        "artifacts",
+                    ],
+                    capture=True,
+                )
+                action_summary = json.loads(action_result.stdout)
+                action_files = {path.name for path in (action_workspace / "artifacts").iterdir()}
+                if (
+                    action_summary.get("terminal_state") != "clean-no-op"
+                    or action_summary.get("external_calls") != 0
+                    or action_files != {"normalized.json", "run.json", "last-success.json"}
+                ):
+                    raise RuntimeError(f"installed companion Action smoke failed for {kind}")
+                run_installed(["-m", "evidence_loop", "demo", "--output", str(temp_root / f"demo-{kind}")])
+                result = run_installed(["-m", "evidence_loop", "benchmark"], capture=True)
                 summary = json.loads(result.stdout)
                 if summary.get("suite") != "deterministic-public-conformance-v1" or summary.get("passed") != summary.get("total"):
                     raise RuntimeError(f"artifact benchmark failed for {kind}")
@@ -164,7 +253,7 @@ def main(argv: list[str] | None = None) -> int:
     except subprocess.CalledProcessError:
         print("artifact-smoke blocked: release tooling/build step failed; inspect the build output", file=sys.stderr)
         return 2
-    print("artifact smoke: wheel and sdist metadata/install/validate/run/demo/benchmark passed")
+    print("artifact smoke: wheel and sdist metadata/install/validate/run/action/demo/benchmark passed")
     return 0
 
 

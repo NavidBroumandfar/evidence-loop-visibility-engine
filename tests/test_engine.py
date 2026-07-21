@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import json
+import copy
+import hashlib
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
 
 from evidence_loop.capabilities import CAPABILITIES, route
+from evidence_loop.errors import InputError
 from evidence_loop.engine import execute, persist, receipt_digest
+from evidence_loop.normalizer import normalize_envelopes
 from evidence_loop.schema import canonical_json
 
 
@@ -146,3 +151,56 @@ class EngineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             persist(receipt, temp)
             self.assertFalse((Path(temp) / "last-success.json").exists())
+
+    def test_schema_v2_receipt_preserves_digest_purposes_and_unknown_is_ineligible(self):
+        envelope = json.loads((ROOT / "examples" / "connector-envelope.json").read_text(encoding="utf-8"))
+        document = normalize_envelopes([envelope], datetime(2026, 12, 31, tzinfo=timezone.utc))
+        receipt = execute(canonical_json(document))
+        evidence = document["sites"][0]["evidence"][0]
+        self.assertEqual(receipt["schema_version"], "2")
+        self.assertEqual(receipt["input_digest"], document["input_digest"])
+        self.assertEqual(receipt["sites"][0]["evidence"][0]["provider_response_sha256"], evidence["provider_response_sha256"])
+        document["sites"][0]["evidence"][0]["uncertainty"] = "unknown"
+        document["sites"][0]["opportunities"] = [
+            {
+                "opportunity_id": "v2-unknown",
+                "domain": "technical-seo",
+                "title": "Remain conservative",
+                "priority": 1,
+                "evidence_ids": [evidence["evidence_id"]],
+                "approval_gate": "human-review",
+            }
+        ]
+        document["input_digest"] = __import__("hashlib").sha256(canonical_json({key: value for key, value in document.items() if key != "input_digest"})).hexdigest()
+        conservative = execute(canonical_json(document))
+        self.assertEqual(conservative["terminal_state"], "clean-no-op")
+
+    def test_schema_v2_identity_tampering_fails_before_execution_after_digest_refresh(self):
+        def document() -> dict:
+            envelope = fixture("connector-envelope.json")
+            return normalize_envelopes([envelope], datetime(2026, 12, 31, tzinfo=timezone.utc))
+
+        def evidence(candidate: dict) -> dict:
+            return candidate["sites"][0]["evidence"][0]
+
+        mutations = {
+            "site-url": lambda candidate: candidate["sites"][0].update(site="https://beta.example"),
+            "site-id": lambda candidate: candidate["sites"][0].update(site_id="site-beta"),
+            "provider": lambda candidate: evidence(candidate)["facts"].update(provider="other-provider"),
+            "scope": lambda candidate: evidence(candidate)["facts"].update(scope_ref="public-beta"),
+            "observation-window": lambda candidate: evidence(candidate)["facts"]["observation_window"].update(start="2026-07-18T00:00:01Z"),
+            "comparison-window": lambda candidate: evidence(candidate)["facts"]["comparison_window"].update(start="2026-07-16T00:00:01Z"),
+            "observed-at": lambda candidate: evidence(candidate).update(observed_at="2026-07-19T10:00:01Z"),
+            "grain": lambda candidate: evidence(candidate)["facts"].update(grain="page-level"),
+            "source": lambda candidate: evidence(candidate).update(source_kind="other-source"),
+        }
+        for name, mutate in mutations.items():
+            with self.subTest(name=name):
+                candidate = copy.deepcopy(document())
+                mutate(candidate)
+                candidate["input_digest"] = hashlib.sha256(
+                    canonical_json({key: value for key, value in candidate.items() if key != "input_digest"})
+                ).hexdigest()
+                with self.assertRaises(InputError) as ctx:
+                    execute(canonical_json(candidate))
+                self.assertEqual(ctx.exception.code, "evidence-identity")

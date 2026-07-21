@@ -1,0 +1,41 @@
+{
+  "schema_version": "1",
+  "source": "synthetic-connector",
+  "provider": "synthetic-provider",
+  "scope_ref": "public-alpha",
+  "site_id": "site-alpha",
+  "site_url": "https://alpha.example/",
+  "observation_window": {
+    "start": "2026-07-18T00:00:00Z",
+    "end": "2026-07-19T10:00:00Z"
+  },
+  "comparison_window": {
+    "start": "2026-07-16T00:00:00Z",
+    "end": "2026-07-17T23:59:59Z"
+  },
+  "collected_at": "2026-07-19T10:00:00Z",
+  "grain": "site-level",
+  "completeness": "complete",
+  "freshness": "fresh",
+  "uncertainty": "low",
+  "limitations": "Synthetic offline observation.",
+  "measures": {
+    "observations": {
+      "value": 42,
+      "unit": "count"
+    }
+  },
+  "lineage": [
+    {
+      "stage": "provider-response",
+      "reference": "provider_response_sha256",
+      "method": "sha256"
+    },
+    {
+      "stage": "connector-envelope",
+      "reference": "synthetic-envelope",
+      "method": "json"
+    }
+  ],
+  "provider_response_sha256": "6f05a93f404f1cf80ff393c2156284e4ff6b8e4bf3842d8cdd4370a3cba165e7"
+}

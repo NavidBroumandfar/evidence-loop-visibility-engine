@@ -9,9 +9,10 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .engine import execute, persist
+from .engine import _atomic_write, _reject_output_children, execute, persist
 from .errors import EvidenceLoopError
-from .schema import load_document
+from .normalizer import load_envelope, normalize_envelopes, serialized_normalized_document
+from .schema import MAX_BYTES, MAX_ITEMS, load_document, parse_utc_timestamp, safe_path
 
 
 def _summary(receipt: dict[str, object]) -> dict[str, object]:
@@ -39,6 +40,40 @@ def _cmd_run(args: argparse.Namespace) -> int:
     persist(receipt, args.output)
     print(json.dumps(_summary(receipt), sort_keys=True))
     return 3 if receipt["terminal_state"] == "blocked" else 0
+
+
+def _cmd_normalize(args: argparse.Namespace) -> int:
+    if len(args.input) > MAX_ITEMS:
+        raise EvidenceLoopError("too-many-items", "connector envelope input count exceeds the public limit")
+    as_of = parse_utc_timestamp(args.as_of, label="as_of")
+    envelopes = []
+    total_bytes = 0
+    for path_value in args.input:
+        envelope, raw = load_envelope(path_value)
+        total_bytes += len(raw)
+        if total_bytes > MAX_BYTES:
+            raise EvidenceLoopError("input-too-large", "connector envelope set exceeds the 1 MB public boundary")
+        envelopes.append(envelope)
+    document = normalize_envelopes(envelopes, as_of)
+    output = safe_path(args.output, output=True)
+    output.mkdir(parents=True, exist_ok=True)
+    if output.is_symlink():
+        raise EvidenceLoopError("symlink-output", "output directory must not be a symlink")
+    _reject_output_children(output)
+    _atomic_write(output / "normalized.json", serialized_normalized_document(document))
+    print(
+        json.dumps(
+            {
+                "schema_version": document["schema_version"],
+                "input_count": len(envelopes),
+                "site_count": len(document["sites"]),
+                "evidence_count": sum(len(site["evidence"]) for site in document["sites"]),
+                "external_calls": 0,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0
 
 
 def _resource_bytes(name: str) -> bytes:
@@ -83,6 +118,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--input", required=True)
     run.add_argument("--output", required=True)
     run.set_defaults(func=_cmd_run)
+    normalize = sub.add_parser("normalize", help="normalize credential-free connector envelopes offline")
+    normalize.add_argument("--input", action="append", required=True, metavar="FILE")
+    normalize.add_argument("--output", required=True)
+    normalize.add_argument("--as-of", required=True, help="strict UTC timestamp used as the collection upper bound")
+    normalize.set_defaults(func=_cmd_normalize)
     demo = sub.add_parser("demo", help="run committed synthetic examples")
     demo.add_argument("--output", required=True)
     demo.set_defaults(func=_cmd_demo)
