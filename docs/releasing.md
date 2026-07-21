@@ -2,6 +2,15 @@
 
 Releases are maintainer operations. Contributors do not need PyPI credentials.
 
+The `0.3.0` Phase 1 release candidate was controller-accepted
+on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
+evaluation returned PASS. It remains unreleased and unpublished; its bounded
+live connector proof is compatibility evidence, not traffic, ranking,
+conversion, causality, or production evidence. This satisfies the implementation
+review/acceptance checkpoint only. Do not create `v0.3.0`, a GitHub release,
+or a package publication without the remaining release gates and explicit
+external release authority. The existing `0.2.0` history remains unchanged.
+
 ## Contract
 
 - A GitHub release is the only publication trigger.
@@ -19,7 +28,8 @@ Releases are maintainer operations. Contributors do not need PyPI credentials.
 - This workflow does not read or consume a long-lived PyPI API token.
 - The GitHub `pypi` environment must be limited to tags matching `v*` and must
   require maintainer review before the first release is published.
-- Package versions and Git tags must match: version `0.2.0` is tag `v0.2.0`.
+- Package versions and Git tags must match for an authorized release. Version
+  `0.2.0` is historical tag `v0.2.0`; local version `0.3.0` has no tag.
 - Published files are immutable. A failed release is repaired with a new
   version; an existing version is never overwritten.
 
@@ -33,16 +43,25 @@ The Trusted Publisher identity is exact:
 
 ## Maintainer checklist
 
-1. Confirm `main` is clean, synchronized, and green.
-2. Confirm the changelog, package version, citation version, and tag agree.
-3. Run `make check` and `python scripts/artifact_smoke.py` locally.
-4. Confirm the pending or existing PyPI Trusted Publisher matches the identity
+1. Confirm the immutable final candidate identity in an external acceptance
+   record and obtain controller closure, then obtain explicit authority for the
+   external release action. Record an independent evaluation only when one was
+   actually authorized and run; do not embed a self-referential final
+   fingerprint in the candidate tree.
+2. Confirm `main` is clean, synchronized, and green.
+3. Confirm the changelog, package version, citation version, and new tag
+   agree; do not treat an unreleased checkpoint heading as a release.
+4. Run `make check` and `python scripts/artifact_smoke.py` locally.
+5. Validate root `action.yml` syntax, full-SHA external Action pinning,
+   least-privilege usage, and the synthetic Action-equivalent artifact set.
+   A local result is not a hosted GitHub Actions run.
+6. Confirm the pending or existing PyPI Trusted Publisher matches the identity
    above exactly.
-5. Verify the GitHub `pypi` environment still has the required `v*` deployment
+7. Verify the GitHub `pypi` environment still has the required `v*` deployment
    policy and maintainer review.
-6. Publish the matching GitHub release and approve the protected `pypi`
+8. Publish the matching GitHub release and approve the protected `pypi`
    deployment after reviewing the build job.
-7. Verify the package page and install the published version in a clean
+9. Verify the package page and install the published version in a clean
    environment.
 
 This workflow publishes only the offline public package. It does not run a

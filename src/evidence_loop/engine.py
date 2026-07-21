@@ -19,8 +19,14 @@ def _eligible(opportunity: dict[str, Any], evidence_by_id: dict[str, dict[str, A
         return False
     refs = [evidence_by_id[eid] for eid in opportunity["evidence_ids"]]
     # Freshness is a hard gate. Partial evidence can support a proposal, but
-    # missing evidence cannot.
-    return all(item["freshness"] == "fresh" and item["completeness"] != "missing" for item in refs)
+    # missing evidence cannot. Schema v2 carries ``unknown`` explicitly, and
+    # an unknown state is never eligible for a proposal.
+    return all(
+        item["freshness"] == "fresh"
+        and item["completeness"] not in {"missing", "unknown"}
+        and item["uncertainty"] != "unknown"
+        for item in refs
+    )
 
 
 def _choose(site: dict[str, Any]) -> dict[str, Any] | None:
@@ -86,9 +92,17 @@ def receipt_digest(receipt: dict[str, Any]) -> str:
     return hashlib.sha256(canonical_json(body)).hexdigest()
 
 
+def _receipt_evidence(item: dict[str, Any], schema_version: str) -> dict[str, Any]:
+    evidence = {key: item[key] for key in ("evidence_id", "source_kind", "observed_at", "completeness", "freshness", "uncertainty")}
+    if schema_version == "2":
+        evidence["provider_response_sha256"] = item["provider_response_sha256"]
+    return evidence
+
+
 def execute(raw: bytes) -> dict[str, Any]:
     """Execute exactly the supplied raw bytes; parse and hash inside the boundary."""
     document = parse_document_bytes(raw)
+    schema_version = document["schema_version"]
     input_sha256 = hashlib.sha256(raw).hexdigest()
     site_results: list[dict[str, Any]] = []
     for site in document["sites"]:
@@ -124,10 +138,7 @@ def execute(raw: bytes) -> dict[str, Any]:
                 site_results.append(
                     {
                         "site_id": site["site_id"],
-                        "evidence": [
-                            {key: item[key] for key in ("evidence_id", "source_kind", "observed_at", "completeness", "freshness", "uncertainty")}
-                            for item in site["evidence"]
-                        ],
+                        "evidence": [_receipt_evidence(item, schema_version) for item in site["evidence"]],
                         "status": site_status,
                         "selected_opportunity_id": selected_id,
                         "blocked_reason": blocked_reason,
@@ -138,10 +149,7 @@ def execute(raw: bytes) -> dict[str, Any]:
                 site_results.append(
                     {
                         "site_id": site["site_id"],
-                        "evidence": [
-                            {key: item[key] for key in ("evidence_id", "source_kind", "observed_at", "completeness", "freshness", "uncertainty")}
-                            for item in site["evidence"]
-                        ],
+                        "evidence": [_receipt_evidence(item, schema_version) for item in site["evidence"]],
                         "status": "approval-required",
                         "selected_opportunity_id": selected_id,
                         "blocked_reason": None,
@@ -164,7 +172,7 @@ def execute(raw: bytes) -> dict[str, Any]:
         terminal = "clean-no-op"
     run_id = document.get("run_id") or f"run-{input_sha256[:12]}"
     receipt: dict[str, Any] = {
-        "schema_version": "1",
+        "schema_version": schema_version,
         "run_id": run_id,
         "terminal_state": terminal,
         "input_sha256": input_sha256,
@@ -184,6 +192,8 @@ def execute(raw: bytes) -> dict[str, Any]:
             "approval_boundary": "human-required",
         },
     }
+    if schema_version == "2":
+        receipt["input_digest"] = document["input_digest"]
     receipt["receipt_sha256"] = receipt_digest(receipt)
     return receipt
 

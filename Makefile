@@ -1,21 +1,23 @@
 .PHONY: check test compile scan demo benchmark artifact-smoke
 
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
+
 test:
-	python3 -m unittest discover -s tests -v
+	$(PYTHON) -m unittest discover -s tests -v
 
 compile:
-	python3 -m compileall -q src tests scripts
+	$(PYTHON) -m compileall -q src tests scripts
 
 scan:
-	python3 scripts/validate_public_release.py
+	$(PYTHON) scripts/validate_public_release.py
 
 demo:
-	python3 -m evidence_loop demo --output work/demo
+	$(PYTHON) -m evidence_loop demo --output work/demo
 
 benchmark:
-	python3 -m evidence_loop benchmark
+	$(PYTHON) -m evidence_loop benchmark
 
 artifact-smoke:
-	.venv/bin/python scripts/artifact_smoke.py
+	$(PYTHON) scripts/artifact_smoke.py
 
 check: test compile scan

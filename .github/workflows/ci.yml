@@ -34,6 +34,33 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -e '.[release]'
       - run: python scripts/artifact_smoke.py
+  companion-action:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Prepare synthetic reserved-domain envelopes
+        shell: bash
+        run: |
+          mkdir -p work/action-envelopes
+          cp examples/connector-envelope.json work/action-envelopes/first.json
+          cp examples/connector-envelope-second.json work/action-envelopes/second.json
+      - name: Run the local companion Action
+        id: evidence-loop
+        uses: ./
+        with:
+          envelope-directory: work/action-envelopes
+          as-of: 2026-12-31T00:00:00Z
+          output-directory: work/action-output
+      - name: Require the truthful envelope-only state
+        shell: bash
+        env:
+          TERMINAL_STATE: ${{ steps.evidence-loop.outputs.terminal-state }}
+          EXTERNAL_CALLS: ${{ steps.evidence-loop.outputs.external-calls }}
+        run: |
+          test "$TERMINAL_STATE" = "clean-no-op"
+          test "$EXTERNAL_CALLS" = "0"
   secret-scan:
     runs-on: ubuntu-latest
     steps:

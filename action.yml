@@ -1,0 +1,71 @@
+name: Evidence Loop companion
+description: Validate sanitized connector envelopes and run one bounded offline Evidence Loop cycle.
+author: Navid Broumandfar
+
+inputs:
+  envelope-directory:
+    description: Repository-relative directory containing only Connector Exchange Envelope v1 JSON files.
+    required: true
+  as-of:
+    description: Explicit UTC collection upper bound in YYYY-MM-DDTHH:MM:SSZ form.
+    required: true
+  output-directory:
+    description: New repository-relative directory for the approved normalized document and receipt files.
+    required: false
+    default: evidence-loop-action-output
+
+outputs:
+  terminal-state:
+    description: approval-required, clean-no-op, or blocked.
+    value: ${{ steps.execute.outputs.terminal-state }}
+  input-digest:
+    description: Canonical normalized-document SHA-256.
+    value: ${{ steps.execute.outputs.input-digest }}
+  receipt-sha256:
+    description: Canonical core receipt SHA-256.
+    value: ${{ steps.execute.outputs.receipt-sha256 }}
+  external-calls:
+    description: Always zero for the evidence-loop execution.
+    value: ${{ steps.execute.outputs.external-calls }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      with:
+        python-version: "3.12"
+    - name: Validate, normalize, and run one bounded cycle
+      id: execute
+      shell: bash
+      env:
+        EVIDENCE_LOOP_WORKSPACE: ${{ github.workspace }}
+        EVIDENCE_LOOP_ENVELOPE_DIRECTORY: ${{ inputs.envelope-directory }}
+        EVIDENCE_LOOP_AS_OF: ${{ inputs.as-of }}
+        EVIDENCE_LOOP_OUTPUT_DIRECTORY: ${{ inputs.output-directory }}
+        EVIDENCE_LOOP_RUNNER_TEMP: ${{ runner.temp }}
+        PYTHONPATH: ${{ github.action_path }}/src
+      run: |
+        python -m evidence_loop.action_runner \
+          --workspace "$EVIDENCE_LOOP_WORKSPACE" \
+          --envelope-directory "$EVIDENCE_LOOP_ENVELOPE_DIRECTORY" \
+          --as-of "$EVIDENCE_LOOP_AS_OF" \
+          --output-directory "$EVIDENCE_LOOP_OUTPUT_DIRECTORY" \
+          --runner-temp "$EVIDENCE_LOOP_RUNNER_TEMP" \
+          --github-output "$GITHUB_OUTPUT"
+    - name: Upload approved Evidence Loop artifacts
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: evidence-loop-receipt
+        path: ${{ steps.execute.outputs.artifact-path }}
+        if-no-files-found: error
+        include-hidden-files: false
+        retention-days: 7
+    - name: Preserve blocked exit semantics
+      if: steps.execute.outputs.terminal-state == 'blocked'
+      shell: bash
+      run: exit 3
+
+branding:
+  icon: shield
+  color: blue

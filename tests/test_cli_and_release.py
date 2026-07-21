@@ -15,6 +15,7 @@ import importlib.resources as resources
 from unittest import mock
 
 from evidence_loop.cli import main
+from evidence_loop.schema import MAX_BYTES, MAX_ITEMS, load_document
 from scripts import verify_release
 from scripts.validate_public_release import scan
 from scripts.artifact_manifest import verify_digest_manifest, write_digest_manifest
@@ -27,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class CliAndReleaseTests(unittest.TestCase):
     def test_release_tag_and_digest_manifest(self):
-        self.assertEqual(expected_tag(ROOT), "v0.2.0")
+        self.assertEqual(expected_tag(ROOT), "v0.3.0")
         decoy = '''decoy = """
 [project]
 version = "0.2.0"
@@ -95,7 +96,7 @@ version = "9.9.9"
                 verify_digest_manifest(root, manifest)
 
     def test_release_version_and_svg_assets(self):
-        version = "0.2.0"
+        version = "0.3.0"
         self.assertEqual(__import__("evidence_loop").__version__, version)
         self.assertIn(f'version = "{version}"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"))
         self.assertIn(f"version: {version}", (ROOT / "CITATION.cff").read_text(encoding="utf-8"))
@@ -122,6 +123,31 @@ version = "9.9.9"
                     if name == "href":
                         self.assertTrue(value.startswith("#"))
 
+    def test_makefile_prefers_local_venv_and_retains_ci_fallback(self):
+        makefile = ROOT / "Makefile"
+        with tempfile.TemporaryDirectory() as temp:
+            local_root = Path(temp)
+            (local_root / ".venv" / "bin").mkdir(parents=True)
+            (local_root / ".venv" / "bin" / "python").touch()
+            local = subprocess.run(
+                ["make", "-f", str(makefile), "-n", "test"],
+                cwd=local_root,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertTrue(local.stdout.startswith(".venv/bin/python -m unittest"))
+
+        with tempfile.TemporaryDirectory() as temp:
+            ci = subprocess.run(
+                ["make", "-f", str(makefile), "-n", "test"],
+                cwd=temp,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertTrue(ci.stdout.startswith("python3 -m unittest"))
+
     def test_cli_validate_run_demo_benchmark(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
@@ -144,6 +170,95 @@ version = "9.9.9"
         benchmark = json.loads(out.getvalue())
         self.assertEqual(benchmark["passed"], benchmark["total"])
         self.assertIn("pass_rate", benchmark)
+
+    def test_cli_normalize_is_atomic_value_free_and_path_safe(self):
+        first = ROOT / "examples" / "connector-envelope.json"
+        second = ROOT / "examples" / "connector-envelope-second.json"
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            output = root / "normalized"
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(
+                    main(
+                        [
+                            "normalize",
+                            "--input",
+                            str(first),
+                            "--input",
+                            str(second),
+                            "--output",
+                            str(output),
+                            "--as-of",
+                            "2026-12-31T00:00:00Z",
+                        ]
+                    ),
+                    0,
+                )
+            summary = json.loads(out.getvalue())
+            self.assertEqual(set(summary), {"schema_version", "input_count", "site_count", "evidence_count", "external_calls"})
+            self.assertEqual(summary["external_calls"], 0)
+            original = (output / "normalized.json").read_bytes()
+            normalized, raw, _ = load_document(output / "normalized.json")
+            self.assertEqual(normalized["schema_version"], "2")
+            self.assertLessEqual(len(raw), MAX_BYTES)
+            first_large = root / "first-large.json"
+            second_large = root / "second-large.json"
+            padded = first.read_bytes() + b" " * (MAX_BYTES // 2)
+            first_large.write_bytes(padded)
+            second_large.write_bytes(padded)
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(["normalize", "--input", str(first_large), "--input", str(second_large), "--as-of", "2026-12-31T00:00:00Z", "--output", str(output)]), 2)
+            self.assertEqual((output / "normalized.json").read_bytes(), original)
+            oversized = {"schema_version": "2", "sites": [], "padding": "x" * MAX_BYTES}
+            with mock.patch("evidence_loop.cli.normalize_envelopes", return_value=oversized), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(["normalize", "--input", str(first), "--as-of", "2026-12-31T00:00:00Z", "--output", str(output)]), 2)
+            self.assertEqual((output / "normalized.json").read_bytes(), original)
+            invalid = root / "invalid.json"
+            invalid.write_text('{"schema_version":"1"}', encoding="utf-8")
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(["normalize", "--input", str(invalid), "--as-of", "2026-12-31T00:00:00Z", "--output", str(output)]), 2)
+            self.assertEqual((output / "normalized.json").read_bytes(), original)
+            link = root / "output-link"
+            link.symlink_to(output, target_is_directory=True)
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(["normalize", "--input", str(first), "--as-of", "2026-12-31T00:00:00Z", "--output", str(link)]), 2)
+
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as missing_as_of:
+                main(["normalize", "--input", str(first), "--output", str(output)])
+            self.assertEqual(missing_as_of.exception.code, 2)
+            self.assertEqual((output / "normalized.json").read_bytes(), original)
+
+            over_cardinality = ["normalize", "--as-of", "2026-12-31T00:00:00Z", "--output", str(output)]
+            for index in range(MAX_ITEMS + 1):
+                over_cardinality.extend(("--input", f"ignored-{index}.json"))
+            with mock.patch("evidence_loop.cli.load_envelope") as load, contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(over_cardinality), 2)
+            load.assert_not_called()
+            self.assertEqual((output / "normalized.json").read_bytes(), original)
+
+            aggregate_inputs = [
+                "normalize",
+                "--input",
+                "first.json",
+                "--input",
+                "second.json",
+                "--input",
+                "third.json",
+                "--as-of",
+                "2026-12-31T00:00:00Z",
+                "--output",
+                str(output),
+            ]
+            oversized_raw = b"x" * (MAX_BYTES // 2 + 1)
+            with mock.patch(
+                "evidence_loop.cli.load_envelope",
+                side_effect=[({}, oversized_raw), ({}, oversized_raw), ({}, oversized_raw)],
+            ) as load, mock.patch("evidence_loop.cli.normalize_envelopes") as normalize, contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(aggregate_inputs), 2)
+            self.assertEqual(load.call_count, 2)
+            normalize.assert_not_called()
+            self.assertEqual((output / "normalized.json").read_bytes(), original)
 
     def test_release_scanner_clean_and_detects_controlled_fixture(self):
         self.assertEqual(scan(ROOT), [])

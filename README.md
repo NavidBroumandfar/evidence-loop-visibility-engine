@@ -1,5 +1,4 @@
 [![CI](https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/NavidBroumandfar/evidence-loop-visibility-engine/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/evidence-loop-visibility-engine.svg)](https://pypi.org/project/evidence-loop-visibility-engine/)
 
 # Evidence Loop Visibility Engine
 
@@ -8,7 +7,13 @@
 A deterministic, offline reference implementation for turning bounded
 visibility evidence into one reviewable proposal per site.
 
-[Install the latest release from PyPI](https://pypi.org/project/evidence-loop-visibility-engine/)
+The `0.3.0` release candidate was controller-accepted
+on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
+evaluation returned PASS. Immutable candidate identities are recorded outside
+the candidate tree so editing a truth document cannot invalidate a fingerprint
+embedded in that same content.
+It is not yet released or published to PyPI. The current PyPI release remains
+`0.2.0` until the reviewed `v0.3.0` release workflow completes.
 
 ![A measured evidence loop moving through Observe, Choose, Propose, a visible verification gate, Record, and three honest terminal states](docs/assets/evidence-loop-system.svg)
 
@@ -52,7 +57,7 @@ operated systems.
 Python 3.10+ is required. Runtime dependencies are the Python standard
 library only.
 
-### Install from PyPI
+### Released PyPI package
 
 ```console
 python3 -m venv .venv
@@ -61,14 +66,19 @@ python3 -m venv .venv
 .venv/bin/evidence-loop benchmark
 ```
 
-### Develop from source
+This invokes the currently published release. Until `0.3.0` is published, use
+the source workflow below to exercise `normalize`.
+
+### Run the 0.3.0 source candidate
+
+From the root of the source working tree:
 
 ```console
-git clone https://github.com/NavidBroumandfar/evidence-loop-visibility-engine.git
-cd evidence-loop-visibility-engine
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
 .venv/bin/evidence-loop validate --input examples/normal.json
+.venv/bin/evidence-loop normalize --input examples/connector-envelope.json --as-of 2026-12-31T00:00:00Z --output work/normalized
+.venv/bin/evidence-loop validate --input work/normalized/normalized.json
 .venv/bin/evidence-loop run --input examples/normal.json --output work/normal
 .venv/bin/evidence-loop demo --output work/demo
 .venv/bin/evidence-loop benchmark
@@ -78,6 +88,13 @@ The package artifact exposes the same `evidence-loop` command. The committed
 `examples/` files are readable fixtures; packaged resources make `demo` and
 `benchmark` work after wheel or source-distribution installation too.
 
+`normalize` accepts one or more sanitized Connector Exchange Envelope v1
+files and deterministically writes a schema-version-2 document. Schema
+version `1` documents remain supported. The installed core performs no
+network or provider calls, and normalization alone creates no opportunities.
+Its `--as-of` UTC collection bound is required; it never falls back to the
+wall clock.
+
 For release artifact validation, install the optional build tools and run the
 same gate:
 
@@ -85,6 +102,31 @@ same gate:
 .venv/bin/pip install -e '.[release]'
 .venv/bin/python scripts/artifact_smoke.py
 ```
+
+## Optional Vercel connector
+
+Vercel users may separately install the
+[Evidence Loop Vercel Web Analytics Connector](https://github.com/NavidBroumandfar/evidence-loop-vercel-web-analytics-connector).
+Its `v0.1.0` GitHub release emits sanitized envelope JSON for this core. It is
+the optional second package; it is not bundled into the core, and it remains
+separately unpublished on PyPI.
+
+## Companion GitHub Action
+
+Phase 3 adds a companion Action that accepts only sanitized
+Connector Exchange Envelope v1 files, requires an explicit UTC `as-of`
+bound, normalizes with the installed public core, and runs one bounded cycle.
+It never invokes or bundles a provider connector. The fixed artifact contains
+only `normalized.json`, `run.json`, and the non-blocked
+`last-success.json`.
+
+External Action dependencies are pinned to full commit SHAs, the core executes
+directly from the immutable Action checkout without package installation, and the documented caller permission is
+`contents: read`. Push and pull-request workflows completed the hosted Action
+job successfully at candidate commit `bfa544e`, with `clean-no-op` and
+`external_calls=0`. This does not prove publication, provider compatibility,
+or a production result. See
+the [companion Action guide](docs/github-action.md).
 
 ## One bounded cycle
 
@@ -138,6 +180,10 @@ isolated.
 
 - `validate --input FILE`: strict validation; exit `0` when valid, `2` on a
   global input/path error.
+- `normalize --input FILE [--input FILE ...] --as-of UTC --output DIR`:
+  required explicit UTC-bound offline Connector Exchange Envelope v1
+  validation and deterministic schema-version-2 output; exit `0` when valid,
+  `2` on an input/output error.
 - `run --input FILE --output DIR`: one bounded cycle; exit `0` for
   `approval-required` or `clean-no-op`, `3` for global `blocked`, and `2` for
   an input/output error.
@@ -165,13 +211,17 @@ Fixtures are synthetic and use reserved example domains.
 ## Documentation and development
 
 - [Architecture](docs/architecture.md)
-- [Loop Engineering](docs/loop-engineering.md)
+- [Loop engineering](docs/loop-engineering.md)
 - [Open-core boundary](docs/open-core-boundary.md)
+- [Connector contract](docs/connector-contract.md)
+- [Optional Vercel connector](https://github.com/NavidBroumandfar/evidence-loop-vercel-web-analytics-connector)
+- [Companion GitHub Action](docs/github-action.md)
 - [Visibility domains](docs/visibility-domains.md)
 - [Security model](docs/security.md)
 - [Public claims](docs/public-claims.md)
 - [Quickstart](docs/quickstart.md)
 - [Release contract](docs/releasing.md)
+- [Roadmap](ROADMAP.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 
 Run `make check` for tests, compilation, and the release scanner. Artifact

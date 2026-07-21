@@ -24,15 +24,31 @@ fail-closed for Python 3.10+.
   receipts.
 - `capabilities.py`: versioned allowlist and deterministic proposal templates.
 - `cli.py`: commands, packaged resources, and value-free summaries.
+- `action_runner.py` and `action.yml`: repository-relative sanitized
+  envelope intake, explicit UTC normalization, one core cycle, fixed safe
+  workflow outputs, and approved artifact upload. They never invoke a
+  connector or read credential environment variables.
 - `scripts/validate_public_release.py`: defense-in-depth release heuristic.
 - `docs/public-claims.md`: approved claim boundary.
+- `docs/connector-contract.md`: versioned clean-room connector envelope
+  semantics and security invariants. The `0.3.0` release candidate was
+  controller-accepted on 2026-07-20 after independent read-only
+  `opencode-go/grok-4.5` (`high`) evaluation returned PASS. It remains
+  unreleased and unpublished until the external release gates pass.
+  Connectors remain separately distributed.
+- `ROADMAP.md`: status truth for the controller-accepted Phase 1 release
+  candidate, separately distributed Phase 2 connector release, and Phase 3
+  companion Action candidate. The connector has a bounded live compatibility
+  proof; the Action has hosted synthetic GitHub execution proof. Update
+  only when phase status materially changes.
 
 ## Required checks
 
 From a fresh checkout, run editable install, full unittest discovery,
 `compileall`, the release scanner, validate/run/demo/benchmark, and wheel/sdist
 artifact smoke. Confirm that installed artifacts—not the source checkout—can
-run all four commands. For the artifact gate, use
+run all CLI commands and the Action-equivalent runner. Validate `action.yml`
+syntax and pinning, then run `tests.test_action`. For the artifact gate, use
 `.venv/bin/pip install -e '.[release]'` followed by
 `.venv/bin/python scripts/artifact_smoke.py`. Use `make check` for the routine
 local gate.
