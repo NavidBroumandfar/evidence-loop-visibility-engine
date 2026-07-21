@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class CliAndReleaseTests(unittest.TestCase):
     def test_release_tag_and_digest_manifest(self):
-        self.assertEqual(expected_tag(ROOT), "v0.3.1")
+        self.assertEqual(expected_tag(ROOT), "v0.3.2")
         decoy = '''decoy = """
 [project]
 version = "0.2.0"
@@ -97,7 +97,7 @@ version = "9.9.9"
                 verify_digest_manifest(root, manifest)
 
     def test_release_version_and_svg_assets(self):
-        version = "0.3.1"
+        version = "0.3.2"
         self.assertEqual(__import__("evidence_loop").__version__, version)
         self.assertIn(f'version = "{version}"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"))
         self.assertIn(f"version: {version}", (ROOT / "CITATION.cff").read_text(encoding="utf-8"))
@@ -127,7 +127,7 @@ version = "9.9.9"
     def test_makefile_prefers_local_venv_and_retains_ci_fallback(self):
         makefile = ROOT / "Makefile"
         make_env = os.environ.copy()
-        for name in ("PYTHON", "MAKEFLAGS", "MAKEOVERRIDES", "MFLAGS", "GNUMAKEFLAGS"):
+        for name in ("PYTHON", "MAKEFLAGS", "MAKEOVERRIDES", "MAKELEVEL", "MFLAGS", "GNUMAKEFLAGS"):
             make_env.pop(name, None)
         with tempfile.TemporaryDirectory() as temp:
             local_root = Path(temp)
@@ -141,7 +141,10 @@ version = "9.9.9"
                 text=True,
                 env=make_env,
             )
-            self.assertTrue(local.stdout.startswith(".venv/bin/python -m unittest"))
+            self.assertIn(
+                ".venv/bin/python -m unittest discover -s tests -v",
+                local.stdout.splitlines(),
+            )
 
         with tempfile.TemporaryDirectory() as temp:
             ci = subprocess.run(
@@ -152,7 +155,10 @@ version = "9.9.9"
                 text=True,
                 env=make_env,
             )
-            self.assertTrue(ci.stdout.startswith("python3 -m unittest"))
+            self.assertIn(
+                "python3 -m unittest discover -s tests -v",
+                ci.stdout.splitlines(),
+            )
 
     def test_cli_validate_run_demo_benchmark(self):
         out = io.StringIO()
