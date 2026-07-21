@@ -1,9 +1,10 @@
 # Companion GitHub Action
 
-> **Status: Codex-validated Phase 3 release candidate (2026-07-21).** It
-> remains unreleased, unpublished, and not yet dispatched on GitHub. Local synthetic
-> validation made no model, evaluator, provider, credential, publication, or
-> deployment call.
+> **Status: Codex-validated Phase 3 release candidate with hosted synthetic
+> GitHub execution proof (2026-07-22).** It remains unreleased and unpublished.
+> Push and pull-request jobs passed at candidate commit `bfa544e` with
+> `clean-no-op` and `external_calls=0`; no model, evaluator, provider,
+> credential, publication, or deployment call occurred in the Action job.
 
 The root `action.yml` executes the public core directly from the immutable
 Action checkout without package installation, validates sanitized Connector Exchange

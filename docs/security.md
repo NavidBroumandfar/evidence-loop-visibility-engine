@@ -32,7 +32,7 @@ This is not a sandbox for untrusted code. Keep adapters and any future live
 integration in a separate, reviewed process with its own credentials and
 approval gates.
 
-The local Phase 3 companion Action adds a fail-closed file orchestration
+The Phase 3 companion Action adds a fail-closed file orchestration
 boundary without adding provider access. It accepts only safe
 repository-relative directory components. The envelope directory must exist
 and contain one to 200 direct regular `.json` children with bounded safe

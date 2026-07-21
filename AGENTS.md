@@ -39,7 +39,7 @@ fail-closed for Python 3.10+.
 - `ROADMAP.md`: status truth for the controller-accepted Phase 1 release
   candidate, separately distributed Phase 2 connector release, and Phase 3
   companion Action candidate. The connector has a bounded live compatibility
-  proof; the Action still requires hosted GitHub execution validation. Update
+  proof; the Action has hosted synthetic GitHub execution proof. Update
   only when phase status materially changes.
 
 ## Required checks

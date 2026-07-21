@@ -6,7 +6,8 @@ evaluation returned PASS. It remains unreleased and unpublished; its bounded
 live connector proof is compatibility evidence, not traffic, ranking,
 conversion, causality, or production evidence. The Phase 3 companion Action candidate was
 added on 2026-07-21 with Codex-only deterministic validation and no model,
-provider, credential, GitHub dispatch, or publication action. The candidate
+provider, credential, or publication action. Hosted synthetic push and
+pull-request Action jobs passed at candidate commit `bfa544e`. The candidate
 has six small offline layers:
 
 1. `schema.py` reads exact bytes, rejects duplicate keys and non-finite JSON,

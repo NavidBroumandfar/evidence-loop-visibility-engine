@@ -8,8 +8,8 @@ embedded in that same content.
 It remains unreleased and unpublished, and is not provider, traffic, ranking,
 conversion, causality, or production-outcome evidence. Phase 2 has a separately
 distributed release candidate with bounded read-only live compatibility proof.
-Phase 3 has a companion Action release candidate that still requires hosted
-GitHub execution. Phase 4 and later remain planned. Status may change based on
+Phase 3 has a companion Action release candidate with hosted synthetic GitHub
+execution proof. Phase 4 and later remain planned. Status may change based on
 access, API availability, and operator feedback.
 
 ## Phase 1 — Connector contract and normalization (in the installed core)
@@ -57,10 +57,10 @@ Repository: [evidence-loop-vercel-web-analytics-connector](https://github.com/Na
 
 ## Phase 3 — Companion GitHub Action
 
-**Status:** Codex-validated release candidate (2026-07-21) — unreleased,
-unpublished, and not yet dispatched on GitHub. At the owner's
-direction this phase used local deterministic Codex checks only and made no
-OpenCode, model, evaluator, provider, or GitHub API call.
+**Status:** Codex-validated release candidate with hosted synthetic GitHub
+execution proof (2026-07-22) — unreleased and unpublished. At the owner's
+direction this phase used deterministic Codex checks only and made no
+OpenCode, model, evaluator, provider, or live-data call.
 
 A GitHub Action that validates and normalizes an envelope using the installed
 public core's normalizer, then operates one bounded evidence loop cycle.
@@ -106,11 +106,12 @@ truthful `clean-no-op`; the underlying core still preserves its existing
 `approval-required`, `clean-no-op`, and `blocked` semantics for valid
 core documents.
 
-Local proof includes focused Action tests, socket-denied synthetic
-Action-equivalent execution, full public checks, static Action/YAML security
-review, and installed wheel/sdist Action-equivalent smoke. It is not a GitHub
-hosted run, publication, release, provider compatibility test, or production
-result. See [docs/github-action.md](docs/github-action.md).
+Proof includes focused Action tests, socket-denied synthetic Action-equivalent
+execution, full public checks, static Action/YAML security review, installed
+wheel/sdist Action-equivalent smoke, and successful hosted push and
+pull-request Action jobs at candidate commit `bfa544e`. It is not publication,
+a provider compatibility test, or a production result. See
+[docs/github-action.md](docs/github-action.md).
 
 ## Phase 4 — Google Search Console connector
 

@@ -122,9 +122,10 @@ only `normalized.json`, `run.json`, and the non-blocked
 
 External Action dependencies are pinned to full commit SHAs, the core executes
 directly from the immutable Action checkout without package installation, and the documented caller permission is
-`contents: read`. The release candidate has not yet completed a hosted
-GitHub Actions run. Local synthetic checks do not prove hosted execution,
-publication, provider compatibility, or a production result. See
+`contents: read`. Push and pull-request workflows completed the hosted Action
+job successfully at candidate commit `bfa544e`, with `clean-no-op` and
+`external_calls=0`. This does not prove publication, provider compatibility,
+or a production result. See
 the [companion Action guide](docs/github-action.md).
 
 ## One bounded cycle

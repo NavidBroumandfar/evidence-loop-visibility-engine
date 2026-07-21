@@ -18,15 +18,16 @@
   repository or its Action.
 - Fixed the local `make check` gate to prefer an existing `.venv` interpreter
   while retaining the system-Python fallback used by CI.
-- Added a local Phase 3 companion GitHub Action candidate. It executes directly
+- Added a Phase 3 companion GitHub Action candidate. It executes directly
   from the immutable Action checkout without package installation, accepts only a
   bounded repository-relative directory of sanitized Connector Exchange
   Envelope v1 JSON files, requires an explicit UTC bound, executes one
   offline cycle, and uploads only the normalized document and core receipts.
   External Action dependencies are commit-pinned and the documented workflow
-  permission is read-only. This candidate has only local synthetic proof; no
-  GitHub Actions run, provider call, credential, publication, or deployment
-  occurred.
+  permission is read-only. Hosted push and pull-request workflows passed the
+  Action job at candidate commit `bfa544e` with synthetic inputs,
+  `clean-no-op`, and `external_calls=0`; no provider call, credential,
+  publication, or deployment occurred in that job.
 - This accepted release candidate remains unreleased and unpublished. Its
   bounded live connector proof establishes read-only contract compatibility,
   not traffic, ranking, conversion, causality, or production outcomes.
