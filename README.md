@@ -7,13 +7,12 @@
 A deterministic, offline reference implementation for turning bounded
 visibility evidence into one reviewable proposal per site.
 
-The `0.3.0` release candidate was controller-accepted
+Version `0.3.0` was controller-accepted
 on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
 evaluation returned PASS. Immutable candidate identities are recorded outside
 the candidate tree so editing a truth document cannot invalidate a fingerprint
-embedded in that same content.
-It is not yet released or published to PyPI. The current PyPI release remains
-`0.2.0` until the reviewed `v0.3.0` release workflow completes.
+embedded in that same content. The `v0.3.0` GitHub release is the publication
+trigger; PyPI availability follows its protected Trusted Publishing workflow.
 
 ![A measured evidence loop moving through Observe, Choose, Propose, a visible verification gate, Record, and three honest terminal states](docs/assets/evidence-loop-system.svg)
 
@@ -66,10 +65,10 @@ python3 -m venv .venv
 .venv/bin/evidence-loop benchmark
 ```
 
-This invokes the currently published release. Until `0.3.0` is published, use
-the source workflow below to exercise `normalize`.
+This invokes the currently published PyPI release. The source workflow below
+exercises the same commands from a checkout.
 
-### Run the 0.3.0 source candidate
+### Run from source
 
 From the root of the source working tree:
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 - Unreleased
+## 0.3.0 - 2026-07-22
 
 - Controller-accepted local Phase 1 implementation checkpoint (2026-07-20)
   after independent read-only `opencode-go/grok-4.5` (`high`) evaluation
@@ -28,8 +28,7 @@
   Action job at candidate commit `bfa544e` with synthetic inputs,
   `clean-no-op`, and `external_calls=0`; no provider call, credential,
   publication, or deployment occurred in that job.
-- This accepted release candidate remains unreleased and unpublished. Its
-  bounded live connector proof establishes read-only contract compatibility,
+- The bounded live connector proof establishes read-only contract compatibility,
   not traffic, ranking, conversion, causality, or production outcomes.
 
 ## 0.2.0 - 2026-07-20

@@ -1,11 +1,11 @@
 # Quickstart
 
-The `0.3.0` Phase 1 release candidate was controller-accepted
+Version `0.3.0` Phase 1 was controller-accepted
 on 2026-07-20 after independent read-only `opencode-go/grok-4.5` (`high`)
-evaluation returned PASS. It remains unreleased and unpublished; its bounded
-live connector proof is compatibility evidence, not traffic, ranking,
-conversion, causality, or production evidence. These source commands exercise
-the candidate only; they do not publish, contact a provider, or mutate a site.
+evaluation returned PASS and passed the external GitHub release gates. Its
+bounded live connector proof is compatibility evidence, not traffic, ranking,
+conversion, causality, or production evidence. These source commands do not
+publish, contact a provider, or mutate a site.
 
 ```console
 python3 -m venv .venv

@@ -14,9 +14,8 @@ keeps its behavior reproducible and its claims inspectable.
 - Deterministic opportunity selection and allowlisted proposal routing.
 - Fail-closed proposal verification and isolated site lanes.
 - Atomic receipts, explicit terminal states, fixtures, and conformance cases.
-- An offline CLI with no site mutation or provider access, including local
-  Connector Exchange Envelope v1 normalization in the controller-accepted,
-  unreleased Phase 1 checkpoint.
+- An offline CLI with no site mutation or provider access, including
+  Connector Exchange Envelope v1 normalization released in Phase 1.
 
 ## What may exist around the core
 
@@ -49,13 +48,13 @@ translation, and digest computation—is Phase 1 release-candidate core logic,
 not provider-specific adapter logic. See
 [connector-contract.md](connector-contract.md).
 
-## Phase 1 release candidate — Envelope normalization in the core
+## Phase 1 — Envelope normalization in the core
 
-The `0.3.0` controller-accepted release candidate includes a
+The `0.3.0` controller-accepted release includes a
 deterministic, offline envelope validator and normalizer. Independent
 read-only `opencode-go/grok-4.5` (`high`) evaluation returned PASS on
-2026-07-20. It remains unreleased and unpublished; it is compatibility
-evidence, not traffic, ranking, conversion, causality, or production evidence. The candidate
+2026-07-20. It is compatibility evidence, not traffic, ranking, conversion,
+causality, or production evidence. The release
 accepts only sanitized, credential-free envelopes from separately distributed
 connectors and translates them into documents the core accepts. Credentials and private provider
 identifiers must never intentionally enter the envelope or the core. The core

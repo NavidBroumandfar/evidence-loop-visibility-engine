@@ -1,7 +1,7 @@
 # Companion GitHub Action
 
-> **Status: Codex-validated Phase 3 release candidate with hosted synthetic
-> GitHub execution proof (2026-07-22).** It remains unreleased and unpublished.
+> **Status: released in public core `v0.3.0` with hosted synthetic GitHub
+> execution proof (2026-07-22).**
 > Push and pull-request jobs passed at candidate commit `bfa544e` with
 > `clean-no-op` and `external_calls=0`; no model, evaluator, provider,
 > credential, publication, or deployment call occurred in the Action job.
